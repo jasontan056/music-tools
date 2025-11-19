@@ -302,6 +302,7 @@ export const TodoList = ({ user }: { user: UserProfile }) => {
                     value={todo.status}
                     data={statusSelectData}
                     size="xs"
+                    aria-label={`Update status for ${todo.title}`}
                     onChange={(value) => updateStatus.mutate({ id: todo.id, status: value as TodoStatus })}
                   />
                   <Tooltip label="Delete task">

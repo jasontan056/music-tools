@@ -32,6 +32,7 @@ packages/
   api/        # Shared tRPC router definitions
   common/     # Types + utilities consumed throughout the monorepo
   db/         # Prisma schema, client, and seed helpers
+  tooling-tests/ # CI-style checks for deploy scripts, Dockerfiles, and Turbo config
 scripts/
   deploy-preview.sh # Example remote deploy helper triggered by CI
 ```
@@ -90,11 +91,12 @@ Each package/app also exposes its own scoped scripts (e.g. `pnpm --filter @acme/
 - `pnpm test` – runs every workspace suite in parallel via Turborepo
 - `pnpm --filter @acme/common test` – unit tests shared utilities (date helpers, constants)
 - `pnpm --filter @acme/api test` – exercises both auth and todo routers with mocked Prisma/Bcrypt/Nanoid to keep the critical flows honest
-- `pnpm --filter @acme/web test` – renders Mantine-based UI components (AuthPanel, TodoList) with Testing Library + jsdom to ensure the responsive dashboard behaves with real data
-- `pnpm --filter @acme/server test` – supertest-powered smoke tests for the Express host + tRPC wiring
-- `pnpm --filter @acme/db test` – guards the Prisma singleton so every service reuses the client across reloads
+- `pnpm --filter @acme/web test` – renders Mantine-based UI components (AuthPanel, TodoList, App shell) with Testing Library + jsdom to ensure the responsive dashboard behaves with real data (form validation, date picker, logout flow)
+- `pnpm --filter @acme/server test` – supertest smoke tests plus a Testcontainers-backed integration suite that boots a disposable Postgres instance and drives register ➜ login ➜ create todo over the real Prisma context
+- `pnpm --filter @acme/db test` – guards the Prisma singleton and now runs the seeding script end-to-end in Postgres, guaranteeing demo data stays fresh
+- `pnpm --filter @acme/tooling-tests test` – hermetic assertions for `scripts/deploy-preview.sh`, Dockerfiles, and `turbo.json` so deployment plumbing regresses less often
 
-These Vitest suites are lightweight (no databases or browsers) so they execute quickly before every feature branch push.
+All suites run under Vitest. The API + DB integration tests rely on Docker (via Testcontainers) to launch ephemeral Postgres databases—ensure the Docker daemon is running locally or in CI before invoking them.
 
 ## Application Features
 
