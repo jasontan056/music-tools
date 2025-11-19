@@ -24,6 +24,7 @@ jobs:
       - run: pnpm install --no-frozen-lockfile
       - run: pnpm lint
       - run: pnpm test || echo "No tests yet"
+      - run: pnpm --filter @acme/tooling-tests test
       - run: pnpm build
   preview:
     if: github.event_name == 'pull_request'
