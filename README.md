@@ -85,6 +85,17 @@ Visit http://localhost:5173, sign in with `demo@example.com` / `demo1234`, and e
 
 Each package/app also exposes its own scoped scripts (e.g. `pnpm --filter @acme/server dev`).
 
+## Testing
+
+- `pnpm test` – runs every workspace suite in parallel via Turborepo
+- `pnpm --filter @acme/common test` – unit tests shared utilities (date helpers, constants)
+- `pnpm --filter @acme/api test` – exercises both auth and todo routers with mocked Prisma/Bcrypt/Nanoid to keep the critical flows honest
+- `pnpm --filter @acme/web test` – renders Mantine-based UI components (AuthPanel, TodoList) with Testing Library + jsdom to ensure the responsive dashboard behaves with real data
+- `pnpm --filter @acme/server test` – supertest-powered smoke tests for the Express host + tRPC wiring
+- `pnpm --filter @acme/db test` – guards the Prisma singleton so every service reuses the client across reloads
+
+These Vitest suites are lightweight (no databases or browsers) so they execute quickly before every feature branch push.
+
 ## Application Features
 
 - **Credential-based auth** – Full sign-up/sign-in/logout flow with hashed passwords, session tokens, and `/auth/me` checks wired through tRPC.

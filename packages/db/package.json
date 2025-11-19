@@ -10,7 +10,8 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",
     "db:push": "prisma db push",
-    "db:seed": "ts-node --esm prisma/seed.ts"
+    "db:seed": "ts-node --esm prisma/seed.ts",
+    "test": "vitest run"
   },
   "dependencies": {
     "@prisma/client": "^5.18.0",
@@ -21,6 +22,7 @@
     "@types/bcryptjs": "^2.4.4",
     "prisma": "^5.18.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.4.0"
+    "typescript": "^5.4.0",
+    "vitest": "^1.6.0"
   }
 }
