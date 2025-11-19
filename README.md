@@ -91,6 +91,7 @@ Each package/app also exposes its own scoped scripts (e.g. `pnpm --filter @acme/
 - **Session-aware backend** – Express context inspects `Authorization: Bearer <token>` headers, fetches Prisma sessions, and enforces ownership on all todo operations.
 - **Rich todo management** – Todos support statuses (Backlog, In Progress, Done), priorities, optional due dates, and are filterable/searchable. Stats cards highlight completion progress for quick triage.
 - **Demo-friendly** – Seeding creates a ready-to-use account (`demo@example.com` / `demo1234`) plus a few illustrative todos so you can show off the experience immediately.
+- **Responsive, modern UI** – Custom Mantine theme (Inter font, gradients, elevated cards) keeps the dashboard polished on mobile and desktop. Auth, stats, filters, and todos adapt to available space without extra configuration.
 
 ## Environment Reference
 

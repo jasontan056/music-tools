@@ -2,10 +2,12 @@ import {
   ActionIcon,
   AppShell,
   Avatar,
+  Badge,
   Center,
   Container,
   Group,
   Loader,
+  Paper,
   Stack,
   Text,
   Title
@@ -46,51 +48,90 @@ const App = () => {
     );
   }
 
-  if (meQuery.error) {
-    return <AuthPanel />;
-  }
-
-  if (!meQuery.data) {
+  if (meQuery.error || !meQuery.data) {
     return <AuthPanel />;
   }
 
   const user = meQuery.data;
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
 
   return (
-    <AppShell header={{ height: 64 }} padding="md">
+    <AppShell
+      header={{ height: 72 }}
+      padding="0"
+      bg="var(--mantine-color-gray-0)"
+      withBorder={false}
+      styles={{
+        header: {
+          borderBottom: '1px solid rgba(0,0,0,0.04)',
+          backdropFilter: 'blur(12px)',
+          backgroundColor: 'rgba(255,255,255,0.9)'
+        }
+      }}
+    >
       <AppShell.Header>
-        <Group h="100%" px="md" justify="space-between">
-          <Group>
-            <Title order={3}>{APP_TITLE}</Title>
-            <Text size="sm" c="dimmed">
-              Type safe todos with auth
-            </Text>
-          </Group>
-          <Group gap="xs">
-            <Avatar radius="xl" color="cyan">
-              {user.name?.[0] ?? user.email[0]}
-            </Avatar>
-            <Stack gap={0}>
-              <Text fw={600}>{user.name ?? 'New teammate'}</Text>
-              <Text size="xs" c="dimmed">
-                {user.email}
+        <Container size="lg" h="100%">
+          <Group h="100%" justify="space-between">
+            <Stack gap={2}>
+              <Text size="sm" c="dimmed">
+                {greeting}, {user.name ?? 'there'} 👋
               </Text>
+              <Title order={3}>{APP_TITLE}</Title>
             </Stack>
-            <ActionIcon
-              variant="subtle"
-              color="red"
-              aria-label="Sign out"
-              onClick={() => logout.mutate()}
-              loading={logout.isPending}
-            >
-              <IconLogout size={18} />
-            </ActionIcon>
+            <Group gap="xs" wrap="nowrap">
+              <Avatar radius="xl" color="ocean">
+                {user.name?.[0] ?? user.email[0]}
+              </Avatar>
+              <Stack gap={0} visibleFrom="sm">
+                <Text fw={600}>{user.name ?? 'New teammate'}</Text>
+                <Group gap={4}>
+                  <Text size="xs" c="dimmed">
+                    {user.email}
+                  </Text>
+                  <Badge size="xs" variant="light" color="midnight">
+                    {user.role.toLowerCase()}
+                  </Badge>
+                </Group>
+              </Stack>
+              <ActionIcon
+                variant="light"
+                color="red"
+                aria-label="Sign out"
+                onClick={() => logout.mutate()}
+                loading={logout.isPending}
+              >
+                <IconLogout size={18} />
+              </ActionIcon>
+            </Group>
           </Group>
-        </Group>
+        </Container>
       </AppShell.Header>
-      <AppShell.Main>
-        <Container size="md" pb="xl">
-          <TodoList user={user} />
+      <AppShell.Main style={{ background: 'radial-gradient(circle at top, #eff6ff 0%, #fdfdfd 60%)' }}>
+        <Container size="lg" py="xl">
+          <Stack gap="xl">
+            <Paper
+              p="xl"
+              radius="xl"
+              style={{
+                background: 'linear-gradient(120deg, #1c7ed6, #7048e8)',
+                color: 'white'
+              }}
+            >
+              <Stack gap="xs">
+                <Text size="sm" fw={500} c="rgba(255,255,255,0.8)">
+                  Plan, prioritize, and ship todos faster
+                </Text>
+                <Title order={2} c="white">
+                  Your personal productivity cockpit
+                </Title>
+                <Text size="sm" c="rgba(255,255,255,0.8)">
+                  Track work-in-progress, capture new tasks, and keep priorities aligned across devices.
+                </Text>
+              </Stack>
+            </Paper>
+            <TodoList user={user} />
+          </Stack>
         </Container>
       </AppShell.Main>
     </AppShell>
