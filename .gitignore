@@ -1,0 +1,13 @@
+node_modules
+.pnp.*
+dist
+build
+.env
+.env.*
+.prisma
+.turbo
+.DS_Store
+.vscode
+coverage
+.tmp
+pnpm-lock.yaml

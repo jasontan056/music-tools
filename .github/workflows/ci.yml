@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.22.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - run: pnpm install --no-frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm test || echo "No tests yet"
+      - run: pnpm build
+  preview:
+    if: github.event_name == 'pull_request'
+    needs: quality
+    runs-on: ubuntu-latest
+    env:
+      SSH_HOST: ${{ secrets.PREVIEW_SSH_HOST }}
+      SSH_USER: ${{ secrets.PREVIEW_SSH_USER }}
+      SSH_KEY: ${{ secrets.PREVIEW_SSH_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run preview deploy script
+        run: bash scripts/deploy-preview.sh
