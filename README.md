@@ -74,7 +74,7 @@ Shared TypeScript configuration lives in `tsconfig.base.json`, while `pnpm-works
    pnpm dev
    ```
 
-Visit http://localhost:5173 to see the todo demo that talks to the tRPC API.
+Visit http://localhost:5173, sign in with `demo@example.com` / `demo1234`, and explore the authenticated todo dashboard powered by tRPC.
 
 ## Common Commands
 
@@ -85,6 +85,13 @@ Visit http://localhost:5173 to see the todo demo that talks to the tRPC API.
 
 Each package/app also exposes its own scoped scripts (e.g. `pnpm --filter @acme/server dev`).
 
+## Application Features
+
+- **Credential-based auth** – Full sign-up/sign-in/logout flow with hashed passwords, session tokens, and `/auth/me` checks wired through tRPC.
+- **Session-aware backend** – Express context inspects `Authorization: Bearer <token>` headers, fetches Prisma sessions, and enforces ownership on all todo operations.
+- **Rich todo management** – Todos support statuses (Backlog, In Progress, Done), priorities, optional due dates, and are filterable/searchable. Stats cards highlight completion progress for quick triage.
+- **Demo-friendly** – Seeding creates a ready-to-use account (`demo@example.com` / `demo1234`) plus a few illustrative todos so you can show off the experience immediately.
+
 ## Environment Reference
 
 | Variable | Location | Description |
@@ -92,8 +99,9 @@ Each package/app also exposes its own scoped scripts (e.g. `pnpm --filter @acme/
 | `DATABASE_URL` | `.env`, `packages/db/.env`, CI secrets | Postgres connection string |
 | `WEB_URL` | `.env` | Where the server should allow CORS from (default `http://localhost:5173`) |
 | `PORT` | `.env` | API listening port (default `4000`) |
+| `AUTH_TOKEN_KEY` | `packages/common` | Frontend storage key for the session token (defaults to `skeleton3.session`) |
 
-The frontend currently sends a static `x-user-id: demo-user` header so the API can simulate an authenticated session. The Prisma seed creates a matching user with ID `demo-user`.
+Session tokens are generated server-side and returned by the auth routers. The React client stores tokens in `localStorage` and automatically injects them into `Authorization` headers for every tRPC call.
 
 ## Deployment Workflow
 

@@ -10,14 +10,16 @@ export const router = t.router;
 export const publicProcedure = t.procedure;
 
 const enforceAuthed = t.middleware(({ ctx, next }) => {
-  if (!ctx.userId) {
+  if (!ctx.user || !ctx.session) {
     throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Missing user session' });
   }
 
   return next({
     ctx: {
-      userId: ctx.userId,
-      prisma: ctx.prisma
+      ...ctx,
+      user: ctx.user,
+      session: ctx.session,
+      sessionToken: ctx.sessionToken
     }
   });
 });
