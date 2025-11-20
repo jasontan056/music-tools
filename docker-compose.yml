@@ -13,6 +13,7 @@ services:
       - pg-data:/var/lib/postgresql/data
 
   server:
+    image: ${SERVER_IMAGE:-skeleton-server}
     build:
       context: .
       dockerfile: apps/server/Dockerfile
@@ -27,6 +28,7 @@ services:
       - '4000:4000'
 
   web:
+    image: ${WEB_IMAGE:-skeleton-web}
     build:
       context: .
       dockerfile: apps/web/Dockerfile

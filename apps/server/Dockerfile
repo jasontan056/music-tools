@@ -3,6 +3,7 @@ FROM node:20-alpine AS base
 WORKDIR /app
 ENV PNPM_HOME=/pnpm
 ENV PATH="$PNPM_HOME:$PATH"
+RUN apk add --no-cache openssl libc6-compat
 RUN corepack enable
 
 FROM base AS deps
@@ -24,9 +25,15 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PNPM_HOME=/pnpm
 ENV PATH="$PNPM_HOME:$PATH"
+RUN apk add --no-cache openssl libc6-compat
 RUN corepack enable
 COPY package.json pnpm-workspace.yaml turbo.json tsconfig.base.json ./
-COPY --from=deps /app/node_modules ./node_modules
+
+# COPY from build to get the generated Prisma Client
+COPY --from=build /app/node_modules ./node_modules
+# COPY workspace packages so symlinks in node_modules work
+COPY --from=build /app/packages ./packages
+
 COPY --from=build /app/apps/server/dist ./apps/server/dist
 COPY apps/server/package.json apps/server/package.json
 CMD ["node", "apps/server/dist/index.js"]
