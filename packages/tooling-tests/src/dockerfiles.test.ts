@@ -11,9 +11,9 @@ describe('Dockerfiles', () => {
     expect(dockerfile).toContain('FROM node:20-alpine AS base');
     expect(dockerfile).toContain('FROM deps AS build');
     expect(dockerfile).toContain('pnpm --filter @acme/db db:generate');
-    expect(dockerfile).toContain('pnpm --filter @acme/server build');
+    expect(dockerfile).toContain('pnpm run -r build');
     expect(dockerfile).toContain('COPY --from=build /app/apps/server/dist ./apps/server/dist');
-    expect(dockerfile).toContain('CMD ["node", "apps/server/dist/index.js"]');
+    expect(dockerfile).toContain('CMD [ "node", "apps/server/dist/index.js" ]');
   });
 
   it('web Dockerfile produces a static bundle served by nginx', () => {

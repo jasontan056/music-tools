@@ -38,7 +38,7 @@ echo "$GHCR_PAT" | docker login ghcr.io -u YOUR_GH_USERNAME --password-stdin
 # Pick your image tags (from CI output) and project slug
 export SERVER_IMAGE=ghcr.io/<org>/<repo>-server:<tag>
 export WEB_IMAGE=ghcr.io/<org>/<repo>-web:<tag>
-export COMPOSE_PROJECT_NAME=skeleton-prod   # becomes skeleton-prod.lvh.me / your domain
+export COMPOSE_PROJECT_NAME=<repo>-prod   # becomes <repo>-prod.preview.example.com (or your domain)
 
 # Optional: point to an external DB instead of the bundled Postgres
 # export DATABASE_URL=postgresql://user:pass@host:5432/dbname
@@ -60,6 +60,7 @@ The workflow `.github/workflows/ci.yml` builds images and, on pull requests, SSH
 - `PREVIEW_SSH_HOST` – droplet IP or hostname.
 - `PREVIEW_SSH_USER` – SSH user with Docker permissions.
 - `PREVIEW_SSH_KEY` – base64-encoded private key for that user (e.g., `base64 -w 0 ~/.ssh/id_ed25519`).
+- `REGISTRY_USER` / `REGISTRY_TOKEN` – registry creds to pull images on the droplet (GHCR: `${{ github.actor }}` + `${{ secrets.GITHUB_TOKEN }}` are set in the workflow).
 
 Make sure the droplet has:
 
@@ -67,4 +68,13 @@ Make sure the droplet has:
 - The `web_proxy` network and Traefik running (`COMPOSE_PROJECT_NAME=skeleton-proxy docker compose -f docker-compose.proxy.yml up -d traefik`).
 - The target base directory `/var/www/skeleton-previews` writable by the SSH user.
 
-Each branch gets its own compose project name derived from the branch (slashes => dashes), so URLs look like `https://<branch>.preview.example.com`. Point your wildcard DNS at the droplet to make those hosts resolve.
+Each branch gets its own compose project name derived as `<repo>-<branch>` (slashes => dashes, lowercased), so URLs look like `https://<repo>-<branch>.preview.example.com`. Point your wildcard DNS at the droplet to make those hosts resolve.
+
+## Cleanup (previews)
+
+Previews create per-project networks, containers, and Postgres volumes. Prune old previews periodically (e.g., PR closed) with:
+
+```bash
+docker compose -p <project> down -v
+docker volume prune -f  # optional, broader cleanup
+```

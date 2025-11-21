@@ -136,4 +136,10 @@ Session tokens are generated server-side and returned by the auth routers. The R
 - Build + launch the stack: `./scripts/test-preview-local.sh` (exports the same `COMPOSE_PROJECT_NAME` and runs migrations/seed)
 - Visit `http://skeleton-local-preview.lvh.me` (API health at `/healthz`)
 
+### Multi-repo Traefik routing (previews)
+
+- Hostnames and volume names derive from `COMPOSE_PROJECT_NAME`. In CI preview deploys, we namespace this as `<repo>-<branch>` (slashes → dashes, lowercased) to avoid collisions across repos and PRs sharing the same branch name.
+- Ensure your wildcard DNS matches the router rule. For example, if previews run at `*.preview.example.com`, configure Traefik labels to use that domain and point the wildcard at your droplet’s IP.
+- Keep a single Traefik instance running on the host (via `docker-compose.proxy.yml`) and reuse its `web_proxy` network from every app stack. Do not start additional Traefik instances binding :80/:443.
+
 Feel free to extend this skeleton by adding CI jobs for testing, integrating more packages, or swapping the auth layer. The defaults are intentionally simple so you can move fast while keeping type-safety throughout the stack.

@@ -63,13 +63,16 @@ echo "rsync $@" >> "${logFile}"
       SSH_HOST: 'preview.example.com',
       SSH_USER: 'deploy',
       SSH_KEY: Buffer.from('fake-key').toString('base64'),
+      GITHUB_REPOSITORY: 'acme/TestRepo',
       GITHUB_HEAD_REF: 'feature/test-branch',
+      SERVER_IMAGE: 'ghcr.io/acme/server:sha',
+      WEB_IMAGE: 'ghcr.io/acme/web:sha',
       PATH: `${binDir}:${process.env.PATH}`
     } satisfies NodeJS.ProcessEnv;
 
     const result = runScript(env);
     expect(result.status).toBe(0);
-    expect(result.stdout).toContain('feature-test-branch');
+    expect(result.stdout).toContain('acme-testrepo-feature-test-branch');
 
     const calls = readFileSync(logFile, 'utf-8');
     expect(calls).toContain('rsync -e');
@@ -77,12 +80,12 @@ echo "rsync $@" >> "${logFile}"
       .split('\n')
       .filter((line) => line.trim().startsWith('ssh '));
     expect(sshCalls).toHaveLength(2);
-    expect(calls).toContain('/var/www/skeleton-previews/feature-test-branch');
+    expect(calls).toContain('/var/www/skeleton-previews/acme-testrepo-feature-test-branch');
 
     const scriptSource = readFileSync(path.join(repoRoot, 'scripts/deploy-preview.sh'), 'utf-8');
-    expect(scriptSource).toContain('pnpm --filter @acme/db db:push');
-    expect(scriptSource).toContain('pnpm --filter @acme/db db:seed');
-    expect(scriptSource).toContain('docker compose up -d --build');
+    expect(scriptSource).toContain('REGISTRY_TOKEN');
+    expect(scriptSource).toContain('docker login ghcr.io');
+    expect(scriptSource).toContain('PREVIEW_SLUG="${REPO_SLUG}-${BRANCH_SLUG}"');
 
     const keyPath = path.join(repoRoot, 'temp_key');
     expect(existsSync(keyPath)).toBe(false);
