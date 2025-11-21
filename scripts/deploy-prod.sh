@@ -44,6 +44,6 @@ export HOST_DOMAIN="\${HOST_DOMAIN:-${PRODUCTION_HOST_DOMAIN:-}}"
 bash deploy-tasks.sh
 SCRIPT
 
-rm temp_key
+rm -f temp_key
 
 echo "Production deploy complete for ${PRODUCTION_SLUG}"

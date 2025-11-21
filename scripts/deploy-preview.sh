@@ -42,6 +42,6 @@ export COMPOSE_PROJECT_NAME="${PREVIEW_SLUG}"
 bash deploy-tasks.sh
 SCRIPT
 
-rm temp_key
+rm -f temp_key
 
 echo "Preview ready at https://${PREVIEW_SLUG}.preview.example.com"
