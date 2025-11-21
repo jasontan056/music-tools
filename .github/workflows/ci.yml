@@ -89,3 +89,31 @@ jobs:
       - uses: actions/checkout@v4
       - name: Run preview deploy script
         run: bash scripts/deploy-preview.sh
+  preview-cleanup:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    env:
+      SSH_HOST: ${{ secrets.PREVIEW_SSH_HOST }}
+      SSH_USER: ${{ secrets.PREVIEW_SSH_USER }}
+      SSH_KEY: ${{ secrets.PREVIEW_SSH_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cleanup preview stack
+        run: bash scripts/cleanup-preview.sh
+  production-deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    env:
+      PRODUCTION_SSH_HOST: ${{ secrets.PRODUCTION_SSH_HOST }}
+      PRODUCTION_SSH_USER: ${{ secrets.PRODUCTION_SSH_USER }}
+      PRODUCTION_SSH_KEY: ${{ secrets.PRODUCTION_SSH_KEY }}
+      SERVER_IMAGE: ${{ fromJSON(needs.build-and-push.outputs.server_image)[0] }}
+      WEB_IMAGE: ${{ fromJSON(needs.build-and-push.outputs.web_image)[0] }}
+      PRODUCTION_HOST_DOMAIN: ${{ secrets.PRODUCTION_HOST_DOMAIN }}
+      REGISTRY_USER: ${{ github.actor }}
+      REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run production deploy script
+        run: bash scripts/deploy-prod.sh

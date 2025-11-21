@@ -34,7 +34,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=web_proxy"
-      - "traefik.http.routers.${COMPOSE_PROJECT_NAME}-api.rule=Host(`${COMPOSE_PROJECT_NAME}.lvh.me`) && PathPrefix(`/trpc`, `/healthz`)"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME}-api.rule=Host(`${COMPOSE_PROJECT_NAME}.${HOST_DOMAIN:-lvh.me}`) && PathPrefix(`/trpc`, `/healthz`)"
       - "traefik.http.routers.${COMPOSE_PROJECT_NAME}-api.entrypoints=web"
       - "traefik.http.services.${COMPOSE_PROJECT_NAME}-api.loadbalancer.server.port=4000"
 
@@ -51,7 +51,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=web_proxy"
-      - "traefik.http.routers.${COMPOSE_PROJECT_NAME}-web.rule=Host(`${COMPOSE_PROJECT_NAME}.lvh.me`)"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME}-web.rule=Host(`${COMPOSE_PROJECT_NAME}.${HOST_DOMAIN:-lvh.me}`)"
       - "traefik.http.routers.${COMPOSE_PROJECT_NAME}-web.entrypoints=web"
       - "traefik.http.services.${COMPOSE_PROJECT_NAME}-web.loadbalancer.server.port=80"
 

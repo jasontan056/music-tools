@@ -11,7 +11,7 @@ This repo ships Dockerized web + API apps plus a Traefik edge proxy. The GitHub 
   sudo usermod -aG docker "$USER" && newgrp docker
   ```
 - A GHCR token with `read:packages` (use `GITHUB_TOKEN` or a PAT).
-- DNS A/CNAME pointing to the droplet (e.g., `*.preview.example.com` or your production domain).
+- DNS A/CNAME pointing to the droplet (e.g., `*.preview.example.com` and your production domain).
 
 ## One-time droplet bootstrap
 
@@ -39,6 +39,7 @@ echo "$GHCR_PAT" | docker login ghcr.io -u YOUR_GH_USERNAME --password-stdin
 export SERVER_IMAGE=ghcr.io/<org>/<repo>-server:<tag>
 export WEB_IMAGE=ghcr.io/<org>/<repo>-web:<tag>
 export COMPOSE_PROJECT_NAME=<repo>-prod   # becomes <repo>-prod.preview.example.com (or your domain)
+export HOST_DOMAIN=example.com            # base domain for router rules
 
 # Optional: point to an external DB instead of the bundled Postgres
 # export DATABASE_URL=postgresql://user:pass@host:5432/dbname
@@ -61,6 +62,8 @@ The workflow `.github/workflows/ci.yml` builds images and, on pull requests, SSH
 - `PREVIEW_SSH_USER` – SSH user with Docker permissions.
 - `PREVIEW_SSH_KEY` – base64-encoded private key for that user (e.g., `base64 -w 0 ~/.ssh/id_ed25519`).
 - `REGISTRY_USER` / `REGISTRY_TOKEN` – registry creds to pull images on the droplet (GHCR: `${{ github.actor }}` + `${{ secrets.GITHUB_TOKEN }}` are set in the workflow).
+- `PRODUCTION_SSH_HOST/USER/KEY` – same as preview, but for prod (used by the `production-deploy` job).
+- `PRODUCTION_HOST_DOMAIN` – base domain for production host rules (e.g., `example.com`).
 
 Make sure the droplet has:
 
@@ -70,6 +73,12 @@ Make sure the droplet has:
 
 Each branch gets its own compose project name derived as `<repo>-<branch>` (slashes => dashes, lowercased), so URLs look like `https://<repo>-<branch>.preview.example.com`. Point your wildcard DNS at the droplet to make those hosts resolve.
 
+## Production deploys (main branch)
+
+- GitHub Actions now runs `production-deploy` on `main`, SSHing into the droplet with `PRODUCTION_SSH_*` secrets. It logs into GHCR, sets `COMPOSE_PROJECT_NAME=<repo>-prod`, and runs `scripts/deploy-prod.sh`, which in turn runs `deploy-tasks.sh` with `DB_COMMAND=db:migrate` and `RUN_SEED=false`.
+- Set `PRODUCTION_HOST_DOMAIN` so Traefik host rules resolve to your real domain (compose uses `${HOST_DOMAIN:-lvh.me}`).
+- If you prefer an external/Postgres service, set `DATABASE_URL` on the droplet before running the script.
+
 ## Cleanup (previews)
 
 Previews create per-project networks, containers, and Postgres volumes. Prune old previews periodically (e.g., PR closed) with:
@@ -78,3 +87,5 @@ Previews create per-project networks, containers, and Postgres volumes. Prune ol
 docker compose -p <project> down -v
 docker volume prune -f  # optional, broader cleanup
 ```
+
+GitHub Actions includes a `preview-cleanup` job that fires on PR close and runs `scripts/cleanup-preview.sh` over SSH to tear down the composed stack and remove its directory.

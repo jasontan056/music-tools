@@ -21,18 +21,24 @@ sleep 5
 # Uses the tools inside the server image to talk to the db container
 PROJECT_NAME="${COMPOSE_PROJECT_NAME:-$(basename "$PWD" | tr '[:upper:]' '[:lower:]')}"
 NETWORK="${PROJECT_NAME}_default"
+DB_COMMAND="${DB_COMMAND:-db:push}"
+RUN_SEED="${RUN_SEED:-true}"
 
 echo "🛠️  Migrating..."
 docker run --rm --network "$NETWORK" \
   -e DATABASE_URL="postgresql://postgres:postgres@db:5432/skeleton" \
   "$SERVER_IMAGE" \
-  pnpm --filter @acme/db db:push
+  pnpm --filter @acme/db "$DB_COMMAND"
 
-echo "🌱 Seeding..."
-docker run --rm --network "$NETWORK" \
-  -e DATABASE_URL="postgresql://postgres:postgres@db:5432/skeleton" \
-  "$SERVER_IMAGE" \
-  pnpm --filter @acme/db db:seed
+if [[ "$RUN_SEED" == "true" ]]; then
+  echo "🌱 Seeding..."
+  docker run --rm --network "$NETWORK" \
+    -e DATABASE_URL="postgresql://postgres:postgres@db:5432/skeleton" \
+    "$SERVER_IMAGE" \
+    pnpm --filter @acme/db db:seed
+else
+  echo "🌱 Seeding skipped (RUN_SEED=$RUN_SEED)"
+fi
 
 # 4. Launch
 docker compose up -d

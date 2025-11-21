@@ -11,7 +11,7 @@ describe('docker-compose.yml', () => {
   });
 
   it('uses host rules derived from COMPOSE_PROJECT_NAME', () => {
-    expect(compose).toContain('Host(`${COMPOSE_PROJECT_NAME}.lvh.me`)');
+    expect(compose).toContain('Host(`${COMPOSE_PROJECT_NAME}.${HOST_DOMAIN:-lvh.me}`)');
     expect(compose).toContain('PathPrefix(`/trpc`, `/healthz`)');
   });
 });
