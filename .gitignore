@@ -10,4 +10,3 @@ build
 .vscode
 coverage
 .tmp
-pnpm-lock.yaml
