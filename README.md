@@ -130,4 +130,10 @@ Session tokens are generated server-side and returned by the auth routers. The R
 - `COMPOSE_PROJECT_NAME` builds the hostname (e.g., `feature-login.lvh.me`); `lvh.me` resolves to `127.0.0.1` for any subdomain, so multiple preview stacks can coexist without entries in `/etc/hosts`.
 - The server’s `WEB_URL` env var uses the same host so CORS aligns with Traefik (`http://${COMPOSE_PROJECT_NAME}.lvh.me` by default).
 
+### Local preview via lvh.me
+
+- Start the proxy (reusable): `COMPOSE_PROJECT_NAME=skeleton-local-preview docker compose -f docker-compose.proxy.yml up -d traefik`
+- Build + launch the stack: `./scripts/test-preview-local.sh` (exports the same `COMPOSE_PROJECT_NAME` and runs migrations/seed)
+- Visit `http://skeleton-local-preview.lvh.me` (API health at `/healthz`)
+
 Feel free to extend this skeleton by adding CI jobs for testing, integrating more packages, or swapping the auth layer. The defaults are intentionally simple so you can move fast while keeping type-safety throughout the stack.
