@@ -19,7 +19,7 @@ describe('Dockerfiles', () => {
   it('web Dockerfile produces a static bundle served by nginx', () => {
     const dockerfile = read('apps/web/Dockerfile');
     expect(dockerfile).toContain('FROM node:20-alpine AS base');
-    expect(dockerfile).toContain('RUN pnpm --filter @acme/web build');
+    expect(dockerfile).toContain('RUN pnpm --filter @acme/web... build');
     expect(dockerfile).toContain('FROM nginx:1.27-alpine AS runner');
     expect(dockerfile).toContain('/usr/share/nginx/html');
     expect(dockerfile).toContain('EXPOSE 80');
