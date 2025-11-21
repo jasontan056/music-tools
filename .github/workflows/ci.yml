@@ -19,13 +19,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: 10.22.0
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'pnpm'
-      - run: pnpm install --no-frozen-lockfile
+      - run: pnpm install
+      - run: pnpm build --filter=./packages/*
       - run: pnpm lint
       - run: pnpm test || echo "No tests yet"
       - run: pnpm --filter @acme/tooling-tests test
