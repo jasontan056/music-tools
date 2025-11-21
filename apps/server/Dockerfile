@@ -14,6 +14,7 @@ COPY apps/web/package.json apps/web/package.json
 COPY packages/common/package.json packages/common/package.json
 COPY packages/api/package.json packages/api/package.json
 COPY packages/db/package.json packages/db/package.json
+COPY packages/db/prisma packages/db/prisma
 RUN pnpm install --frozen-lockfile
 
 FROM deps AS build
