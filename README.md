@@ -123,4 +123,23 @@ Session tokens are generated server-side and returned by the auth routers. The R
 - **Production:** Mirror the preview workflow but point secrets to the production environment. The first deployment provisions the DB; subsequent deploys run migrations only, preserving data.
 - **Docker:** `apps/server/Dockerfile` and `apps/web/Dockerfile` build production images. Use them directly or via `docker compose` alongside the Postgres service defined at the repo root.
 
+## Traefik & Routing
+
+- Start Traefik locally with `docker compose -f docker-compose.proxy.yml up -d traefik`; it creates the shared `web_proxy` network and exposes HTTP on `:80` plus the dashboard on `:8080`.
+- The main stack (`docker compose up`) attaches `web` and `server` to `web_proxy` and advertises routes via labels. The web UI routes on `Host(<project>.lvh.me)`; the API router matches the same host with `PathPrefix(/trpc, /healthz)` and forwards to port `4000`.
+- `COMPOSE_PROJECT_NAME` builds the hostname (e.g., `feature-login.lvh.me`); `lvh.me` resolves to `127.0.0.1` for any subdomain, so multiple preview stacks can coexist without entries in `/etc/hosts`.
+- The server’s `WEB_URL` env var uses the same host so CORS aligns with Traefik (`http://${COMPOSE_PROJECT_NAME}.lvh.me` by default).
+
+### Local preview via lvh.me
+
+- Start the proxy (reusable): `COMPOSE_PROJECT_NAME=skeleton-local-preview docker compose -f docker-compose.proxy.yml up -d traefik`
+- Build + launch the stack: `./scripts/test-preview-local.sh` (exports the same `COMPOSE_PROJECT_NAME` and runs migrations/seed)
+- Visit `http://skeleton-local-preview.lvh.me` (API health at `/healthz`)
+
+### Multi-repo Traefik routing (previews)
+
+- Hostnames and volume names derive from `COMPOSE_PROJECT_NAME`. In CI preview deploys, we namespace this as `<repo>-<branch>` (slashes → dashes, lowercased) to avoid collisions across repos and PRs sharing the same branch name.
+- Set `HOST_DOMAIN` to control the base domain for Traefik host rules (default `lvh.me`). For previews in the wild, set `HOST_DOMAIN=preview.example.com` and add a wildcard DNS to the droplet.
+- Keep a single Traefik instance running on the host (via `docker-compose.proxy.yml`) and reuse its `web_proxy` network from every app stack. Do not start additional Traefik instances binding :80/:443.
+
 Feel free to extend this skeleton by adding CI jobs for testing, integrating more packages, or swapping the auth layer. The defaults are intentionally simple so you can move fast while keeping type-safety throughout the stack.

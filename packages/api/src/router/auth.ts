@@ -3,8 +3,8 @@ import bcrypt from 'bcryptjs';
 import { nanoid } from 'nanoid';
 import { z } from 'zod';
 import type { AuthPayload } from '@acme/common';
-import type { Context } from '../context';
-import { authedProcedure, publicProcedure, router } from '../trpc';
+import type { Context } from '../context.js';
+import { authedProcedure, publicProcedure, router } from '../trpc.js';
 
 const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 30; // 30 days
 

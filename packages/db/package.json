@@ -2,15 +2,15 @@
   "name": "@acme/db",
   "version": "0.0.1",
   "type": "module",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "lint": "tsc --noEmit",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",
     "db:push": "prisma db push",
-    "db:seed": "ts-node --esm prisma/seed.ts",
+    "db:seed": "tsx prisma/seed.ts",
     "test": "vitest run"
   },
   "dependencies": {
@@ -23,7 +23,7 @@
     "@types/bcryptjs": "^2.4.4",
     "prisma": "^5.18.0",
     "testcontainers": "^10.10.3",
-    "ts-node": "^10.9.2",
+    "tsx": "^4.19.2",
     "typescript": "^5.4.0",
     "vitest": "^1.6.0"
   }

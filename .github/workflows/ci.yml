@@ -9,6 +9,10 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
 jobs:
   quality:
     runs-on: ubuntu-latest
@@ -25,10 +29,68 @@ jobs:
       - run: pnpm lint
       - run: pnpm test || echo "No tests yet"
       - run: pnpm --filter @acme/tooling-tests test
-      - run: pnpm build
+  build-and-push:
+    needs: quality
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      server_image: ${{ steps.meta-server.outputs.tags }}
+      web_image: ${{ steps.meta-web.outputs.tags }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build Server
+        id: meta-server
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-server
+          tags: type=ref,event=branch,type=ref,event=pr,type=sha
+      - uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/server/Dockerfile
+          push: true
+          tags: ${{ steps.meta-server.outputs.tags }}
+
+      - name: Build Web
+        id: meta-web
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-web
+          tags: type=ref,event=branch,type=ref,event=pr,type=sha
+      - uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/web/Dockerfile
+          push: true
+          tags: ${{ steps.meta-web.outputs.tags }}
   preview:
     if: github.event_name == 'pull_request'
-    needs: quality
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    env:
+      SSH_HOST: ${{ secrets.PREVIEW_SSH_HOST }}
+      SSH_USER: ${{ secrets.PREVIEW_SSH_USER }}
+      SSH_KEY: ${{ secrets.PREVIEW_SSH_KEY }}
+      SERVER_IMAGE: ${{ fromJSON(needs.build-and-push.outputs.server_image)[0] }}
+      WEB_IMAGE: ${{ fromJSON(needs.build-and-push.outputs.web_image)[0] }}
+      REGISTRY_USER: ${{ github.actor }}
+      REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run preview deploy script
+        run: bash scripts/deploy-preview.sh
+  preview-cleanup:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
     runs-on: ubuntu-latest
     env:
       SSH_HOST: ${{ secrets.PREVIEW_SSH_HOST }}
@@ -36,5 +98,22 @@ jobs:
       SSH_KEY: ${{ secrets.PREVIEW_SSH_KEY }}
     steps:
       - uses: actions/checkout@v4
-      - name: Run preview deploy script
-        run: bash scripts/deploy-preview.sh
+      - name: Cleanup preview stack
+        run: bash scripts/cleanup-preview.sh
+  production-deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    env:
+      PRODUCTION_SSH_HOST: ${{ secrets.PRODUCTION_SSH_HOST }}
+      PRODUCTION_SSH_USER: ${{ secrets.PRODUCTION_SSH_USER }}
+      PRODUCTION_SSH_KEY: ${{ secrets.PRODUCTION_SSH_KEY }}
+      SERVER_IMAGE: ${{ fromJSON(needs.build-and-push.outputs.server_image)[0] }}
+      WEB_IMAGE: ${{ fromJSON(needs.build-and-push.outputs.web_image)[0] }}
+      PRODUCTION_HOST_DOMAIN: ${{ secrets.PRODUCTION_HOST_DOMAIN }}
+      REGISTRY_USER: ${{ github.actor }}
+      REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run production deploy script
+        run: bash scripts/deploy-prod.sh

@@ -8,18 +8,22 @@ import type { Server } from 'node:http';
 import { PostgreSqlContainer } from '@testcontainers/postgresql';
 import type { StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import type { CreateExpressContextOptions } from '@trpc/server/adapters/express';
-import { appRouter, createContext } from '@acme/api';
 import type { AppRouter } from '@acme/api';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const workspaceRoot = path.resolve(__dirname, '..', '..', '..');
 
+type ApiModule = typeof import('@acme/api');
+
 describe('API + database integration', () => {
   let container: StartedPostgreSqlContainer;
   let authToken: string | null = null;
   let server: Server | null = null;
   let baseUrl: string | null = null;
+  // Lazily imported after DATABASE_URL is set to avoid using .env value
+  let appRouter: ApiModule['appRouter'] | null = null;
+  let createContext: ApiModule['createContext'] | null = null;
 
   beforeAll(async () => {
     container = await new PostgreSqlContainer('postgres:16')
@@ -38,6 +42,10 @@ describe('API + database integration', () => {
       env: { ...process.env, DATABASE_URL: dbUrl },
       stdio: 'pipe'
     });
+    // Import only after env is set so Prisma picks up the container URL
+    const apiModule = await import('@acme/api');
+    appRouter = apiModule.appRouter;
+    createContext = apiModule.createContext;
 
     const { createServer } = await import('./app');
     const app = createServer();
@@ -67,6 +75,9 @@ describe('API + database integration', () => {
   });
 
   const createCaller = async () => {
+    if (!appRouter || !createContext) {
+      throw new Error('API modules not loaded');
+    }
     const req = {
       headers: authToken ? { authorization: `Bearer ${authToken}` } : {}
     } as CreateExpressContextOptions['req'];

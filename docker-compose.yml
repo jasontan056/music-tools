@@ -9,10 +9,13 @@ services:
       POSTGRES_DB: skeleton
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+    networks:
+      - default
     volumes:
       - pg-data:/var/lib/postgresql/data
 
   server:
+    image: ${SERVER_IMAGE:-skeleton-server}
     build:
       context: .
       dockerfile: apps/server/Dockerfile
@@ -22,18 +25,39 @@ services:
       NODE_ENV: production
       PORT: 4000
       DATABASE_URL: postgresql://postgres:postgres@db:5432/skeleton
-      WEB_URL: http://web
-    ports:
-      - '4000:4000'
+      # In preview, the webapp lives at a subdomain.
+      # We use the COMPOSE_PROJECT_NAME (e.g. 'feature-login') to build the URL.
+      WEB_URL: http://${COMPOSE_PROJECT_NAME}.lvh.me
+    networks:
+      - default
+      - web_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web_proxy"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME}-api.rule=Host(`${COMPOSE_PROJECT_NAME}.${HOST_DOMAIN:-lvh.me}`) && PathPrefix(`/trpc`, `/healthz`)"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME}-api.entrypoints=web"
+      - "traefik.http.services.${COMPOSE_PROJECT_NAME}-api.loadbalancer.server.port=4000"
 
   web:
+    image: ${WEB_IMAGE:-skeleton-web}
     build:
       context: .
       dockerfile: apps/web/Dockerfile
     depends_on:
       - server
-    ports:
-      - '4173:80'
+    networks:
+      - default
+      - web_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web_proxy"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME}-web.rule=Host(`${COMPOSE_PROJECT_NAME}.${HOST_DOMAIN:-lvh.me}`)"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME}-web.entrypoints=web"
+      - "traefik.http.services.${COMPOSE_PROJECT_NAME}-web.loadbalancer.server.port=80"
 
 volumes:
   pg-data:
+
+networks:
+  web_proxy:
+    external: true
