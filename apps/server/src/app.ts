@@ -5,7 +5,7 @@ import morgan from 'morgan';
 import { createExpressMiddleware } from '@trpc/server/adapters/express';
 import { appRouter, createContext } from '@acme/api';
 import { APP_TITLE } from '@acme/common';
-import { serverConfig } from './env';
+import { serverConfig } from './env.js';
 
 export const createServer = () => {
   const app = express();

@@ -7,33 +7,26 @@ RUN apk add --no-cache openssl libc6-compat
 RUN corepack enable
 
 FROM base AS deps
-COPY package.json pnpm-workspace.yaml turbo.json tsconfig.base.json ./
+# Copy root manifests to leverage Docker cache
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml turbo.json tsconfig.base.json .npmrc ./
 COPY apps/server/package.json apps/server/package.json
 COPY apps/web/package.json apps/web/package.json
 COPY packages/common/package.json packages/common/package.json
 COPY packages/api/package.json packages/api/package.json
 COPY packages/db/package.json packages/db/package.json
-RUN pnpm install --no-frozen-lockfile
+RUN pnpm install --frozen-lockfile
 
 FROM deps AS build
 COPY . .
 RUN pnpm --filter @acme/db db:generate
-RUN pnpm --filter @acme/server build
+RUN pnpm run -r build
 
-FROM node:20-alpine AS runner
+FROM base AS runner
 WORKDIR /app
-ENV NODE_ENV=production
-ENV PNPM_HOME=/pnpm
-ENV PATH="$PNPM_HOME:$PATH"
-RUN apk add --no-cache openssl libc6-compat
-RUN corepack enable
-COPY package.json pnpm-workspace.yaml turbo.json tsconfig.base.json ./
-
-# COPY from build to get the generated Prisma Client
 COPY --from=build /app/node_modules ./node_modules
-# COPY workspace packages so symlinks in node_modules work
+COPY --from=build /app/apps/server/node_modules ./apps/server/node_modules
 COPY --from=build /app/packages ./packages
-
 COPY --from=build /app/apps/server/dist ./apps/server/dist
-COPY apps/server/package.json apps/server/package.json
-CMD ["node", "apps/server/dist/index.js"]
+COPY --from=build /app/apps/server/package.json ./apps/server/package.json
+ENV NODE_ENV=production
+CMD [ "node", "apps/server/dist/index.js" ]

@@ -2,8 +2,8 @@ import type { Prisma } from '@prisma/client';
 import { TodoPriority, TodoStatus } from '@prisma/client';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
-import { authedProcedure, router } from '../trpc';
-import type { Context } from '../context';
+import { authedProcedure, router } from '../trpc.js';
+import type { Context } from '../context.js';
 
 const filtersSchema = z
   .object({
