@@ -9,6 +9,7 @@
     "build": "turbo build",
     "lint": "turbo lint",
     "test": "turbo test",
+    "setup": "./scripts/init-dev.sh",
     "db:generate": "pnpm --filter @acme/db db:generate",
     "db:migrate": "pnpm --filter @acme/db db:migrate",
     "db:seed": "pnpm --filter @acme/db db:seed"

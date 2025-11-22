@@ -16,7 +16,13 @@ This repository serves as the **Skeleton** (or template) for all future hobby ap
     ./scripts/setup-project.sh
     ```
 
-3.  **Push to a New Repository:**
+3.  **Install and Initialize:**
+    Use the setup helper to install dependencies and start the local database.
+    ```bash
+    pnpm setup
+    ```
+
+4.  **Push to a New Repository:**
     Create a new empty repository on GitHub (e.g., `acme/my-new-hobby-app`) and push:
     ```bash
     git remote add origin https://github.com/acme/my-new-hobby-app.git

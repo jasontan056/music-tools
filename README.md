@@ -47,29 +47,17 @@ Shared TypeScript configuration lives in `tsconfig.base.json`, while `pnpm-works
 
 ## Getting Started
 
-1. **Install dependencies** (Node 20+ recommended):
+1. **Setup the environment**
+
+   This command installs dependencies, starts the local database (via Docker), and seeds it with demo data.
 
    ```bash
-   pnpm install
+   pnpm setup
    ```
 
-2. **Start Postgres** locally via Docker:
+2. **Run the apps**
 
-   ```bash
-   docker compose up -d db
-   ```
-
-3. **Database bootstrap** – copy the env file into the Prisma workspace, generate the client, push schema, seed data. Copy/paste this block anytime you reset the DB:
-
-   ```bash
-   cp .env.example .env
-   cp .env packages/db/.env
-   pnpm db:generate
-   pnpm --filter @acme/db db:push
-   pnpm --filter @acme/db db:seed
-   ```
-
-4. **Run the apps** in parallel using Turborepo (web on `5173`, API on `4000`):
+   Start the web and server in parallel (web on `5173`, API on `4000`):
 
    ```bash
    pnpm dev
