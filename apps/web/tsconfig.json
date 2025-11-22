@@ -5,7 +5,8 @@
     "allowJs": false,
     "isolatedModules": true,
     "moduleResolution": "Bundler",
-    "types": ["vite/client"]
+    "types": ["vite/client"],
+    "noEmit": true
   },
   "include": ["src", "vite.config.ts"],
   "exclude": ["src/test", "**/*.test.tsx", "**/*.test.ts"]
