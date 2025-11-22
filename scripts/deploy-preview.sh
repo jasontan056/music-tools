@@ -44,4 +44,4 @@ SCRIPT
 
 rm -f temp_key
 
-echo "Preview ready at https://${PREVIEW_SLUG}.preview.example.com"
+echo "Preview ready at https://${PREVIEW_SLUG}.preview.sotongcove.com"
