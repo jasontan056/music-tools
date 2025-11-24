@@ -7,7 +7,7 @@ Modern full-stack starter that ships with a typed React + Mantine frontend, an E
 | Task | Command / Location |
 | --- | --- |
 | Install deps | `pnpm install` |
-| Start Postgres | `docker compose up -d db` |
+| Start Postgres | `./scripts/db-up.sh` |
 | Generate Prisma client | `pnpm db:generate` |
 | Push schema & seed | see [Database bootstrap](#database-bootstrap) |
 | Run everything | `pnpm dev` (web on 5173, server on 4000) |
@@ -64,6 +64,14 @@ Shared TypeScript configuration lives in `tsconfig.base.json`, while `pnpm-works
    ```
 
 Visit http://localhost:5173, sign in with `demo@example.com` / `demo1234`, and explore the authenticated todo dashboard powered by tRPC.
+
+## Database bootstrap
+
+- Start Postgres: `./scripts/db-up.sh` (uses `docker-compose.dev.yml` to expose 5432 locally without changing production/CI compose).
+- Generate client: `pnpm db:generate`.
+- Quick dev sync: `pnpm --filter @acme/db db:push` then `pnpm --filter @acme/db db:seed`.
+- Create migrations (recommended for shared/stage/prod): `pnpm --filter @acme/db prisma migrate dev --name init` (or a descriptive name). This writes files to `packages/db/prisma/migrations/**`; commit them.
+- Deploy with migrations: `pnpm db:migrate` (or set `DB_COMMAND=db:migrate` when using `scripts/deploy-tasks.sh`). Seed with `pnpm --filter @acme/db db:seed` if you want demo data in that environment.
 
 ## Common Commands
 
