@@ -32,6 +32,8 @@ rsync -e "$SSH_CMD" -az --delete \
 $SSH_CMD ${PRODUCTION_SSH_USER}@${PRODUCTION_SSH_HOST} <<SCRIPT
 set -euo pipefail
 cd ${REMOTE_DIR}
+export REGISTRY_USER="${REGISTRY_USER}"
+export REGISTRY_TOKEN="${REGISTRY_TOKEN}"
 if [[ -n "\${REGISTRY_USER:-}" && -n "\${REGISTRY_TOKEN:-}" ]]; then
   echo "\$REGISTRY_TOKEN" | docker login ghcr.io -u "\$REGISTRY_USER" --password-stdin
 fi

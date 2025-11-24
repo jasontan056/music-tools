@@ -65,6 +65,8 @@ echo "rsync $@" >> "${logFile}"
       GITHUB_HEAD_REF: 'feature/test-branch',
       SERVER_IMAGE: 'ghcr.io/acme/server:sha',
       WEB_IMAGE: 'ghcr.io/acme/web:sha',
+      REGISTRY_USER: 'user',
+      REGISTRY_TOKEN: 'token',
       PATH: `${binDir}:${process.env.PATH}`
     } satisfies NodeJS.ProcessEnv;
 
@@ -87,6 +89,10 @@ echo "rsync $@" >> "${logFile}"
     expect(scriptSource).toContain('REGISTRY_TOKEN');
     expect(scriptSource).toContain('docker login ghcr.io');
     expect(scriptSource).toContain('PREVIEW_SLUG="${REPO_SLUG}-${BRANCH_SLUG}"');
+
+    const remoteScript = readFileSync(stdinLog, 'utf-8');
+    expect(remoteScript).toContain('export REGISTRY_USER="');
+    expect(remoteScript).toContain('export REGISTRY_TOKEN="');
 
     const keyPath = path.join(repoRoot, 'temp_key');
     expect(existsSync(keyPath)).toBe(false);
