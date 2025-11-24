@@ -1,4 +1,4 @@
-# Skeleton3 Monorepo <!-- trigger preview -->
+# Skeleton3 Monorepo
 
 Modern full-stack starter that ships with a typed React + Mantine frontend, an Express + tRPC API, and a PostgreSQL database powered by Prisma. The repository demonstrates how to structure a pnpm/Turborepo mono workspace, share code between packages, and automate preview + production deployments with Docker and GitHub Actions. The guide below is formatted so another agent (or future you) can skim, copy/paste, and get productive in seconds.
 
