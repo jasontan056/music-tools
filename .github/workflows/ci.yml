@@ -82,6 +82,7 @@ jobs:
       SSH_KEY: ${{ secrets.PREVIEW_SSH_KEY }}
       SERVER_IMAGE: ${{ fromJSON(needs.build-and-push.outputs.server_image).tags[0] }}
       WEB_IMAGE: ${{ fromJSON(needs.build-and-push.outputs.web_image).tags[0] }}
+      HOST_DOMAIN: ${{ secrets.HOST_DOMAIN }}
       REGISTRY_USER: ${{ github.actor }}
       REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
