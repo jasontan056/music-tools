@@ -26,5 +26,4 @@ services:
 
 networks:
   web_proxy:
-    name: web_proxy
-    driver: bridge
+    external: true
