@@ -44,4 +44,8 @@ SCRIPT
 
 rm -f temp_key
 
-echo "Preview ready at https://${PREVIEW_SLUG}.preview.sotongcove.com"
+if [[ -n "${HOST_DOMAIN:-}" ]]; then
+  echo "Preview ready at https://${PREVIEW_SLUG}.${HOST_DOMAIN}"
+else
+  echo "Preview ready at http://${PREVIEW_SLUG}.lvh.me"
+fi

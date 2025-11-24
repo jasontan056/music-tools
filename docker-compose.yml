@@ -28,6 +28,16 @@ services:
       # In preview, the webapp lives at a subdomain.
       # We use the COMPOSE_PROJECT_NAME (e.g. 'feature-login') to build the URL.
       WEB_URL: http://${COMPOSE_PROJECT_NAME}.lvh.me
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:4000/healthz" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     networks:
       - default
       - web_proxy
@@ -35,7 +45,8 @@ services:
       - "traefik.enable=true"
       - "traefik.docker.network=web_proxy"
       - "traefik.http.routers.${COMPOSE_PROJECT_NAME}-api.rule=Host(`${COMPOSE_PROJECT_NAME}.${HOST_DOMAIN:-lvh.me}`) && PathPrefix(`/trpc`, `/healthz`)"
-      - "traefik.http.routers.${COMPOSE_PROJECT_NAME}-api.entrypoints=web"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME}-api.entrypoints=web,websecure"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME}-api.tls.certresolver=myresolver"
       - "traefik.http.services.${COMPOSE_PROJECT_NAME}-api.loadbalancer.server.port=4000"
 
   web:
@@ -45,6 +56,11 @@ services:
       dockerfile: apps/web/Dockerfile
     depends_on:
       - server
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
     networks:
       - default
       - web_proxy
@@ -52,11 +68,13 @@ services:
       - "traefik.enable=true"
       - "traefik.docker.network=web_proxy"
       - "traefik.http.routers.${COMPOSE_PROJECT_NAME}-web.rule=Host(`${COMPOSE_PROJECT_NAME}.${HOST_DOMAIN:-lvh.me}`)"
-      - "traefik.http.routers.${COMPOSE_PROJECT_NAME}-web.entrypoints=web"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME}-web.entrypoints=web,websecure"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME}-web.tls.certresolver=myresolver"
       - "traefik.http.services.${COMPOSE_PROJECT_NAME}-web.loadbalancer.server.port=80"
 
 volumes:
   pg-data:
+
 
 networks:
   web_proxy:
