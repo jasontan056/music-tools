@@ -15,11 +15,11 @@ BRANCH="${GITHUB_HEAD_REF:-${GITHUB_REF##*/}}"
 BRANCH_SLUG=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | tr '/' '-')
 REPO_SLUG=$(echo "${GITHUB_REPOSITORY:-skeleton}" | tr '[:upper:]' '[:lower:]' | tr '/' '-')
 PREVIEW_SLUG="${REPO_SLUG}-${BRANCH_SLUG}"
-REMOTE_DIR="/var/www/skeleton-previews/${PREVIEW_SLUG}"
+REMOTE_DIR="~/deployments/skeleton-previews/${PREVIEW_SLUG}"
 
 echo "Creating preview ${PREVIEW_SLUG}..."
 
-echo "$SSH_KEY" | base64 --decode > temp_key
+echo "$SSH_KEY" > temp_key
 chmod 600 temp_key
 SSH_CMD="ssh -i temp_key -o StrictHostKeyChecking=no"
 
@@ -33,12 +33,18 @@ rsync -e "$SSH_CMD" -az --delete \
 $SSH_CMD ${SSH_USER}@${SSH_HOST} <<SCRIPT
 set -euo pipefail
 cd ${REMOTE_DIR}
+export REGISTRY_USER="${REGISTRY_USER}"
+export REGISTRY_TOKEN="${REGISTRY_TOKEN}"
 if [[ -n "\${REGISTRY_USER:-}" && -n "\${REGISTRY_TOKEN:-}" ]]; then
   echo "\$REGISTRY_TOKEN" | docker login ghcr.io -u "\$REGISTRY_USER" --password-stdin
 fi
 export SERVER_IMAGE="${SERVER_IMAGE}"
 export WEB_IMAGE="${WEB_IMAGE}"
 export COMPOSE_PROJECT_NAME="${PREVIEW_SLUG}"
+export HOST_DOMAIN="${HOST_DOMAIN:-}"
+if [[ -n "\${HOST_DOMAIN}" ]]; then
+  export WEB_URL="https://\${COMPOSE_PROJECT_NAME}.\${HOST_DOMAIN}"
+fi
 bash deploy-tasks.sh
 SCRIPT
 

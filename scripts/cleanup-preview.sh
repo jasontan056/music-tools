@@ -10,9 +10,9 @@ BRANCH="${GITHUB_HEAD_REF:-${GITHUB_REF##*/}}"
 BRANCH_SLUG=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | tr '/' '-')
 REPO_SLUG=$(echo "${GITHUB_REPOSITORY:-skeleton}" | tr '[:upper:]' '[:lower:]' | tr '/' '-')
 PREVIEW_SLUG="${REPO_SLUG}-${BRANCH_SLUG}"
-REMOTE_DIR="/var/www/skeleton-previews/${PREVIEW_SLUG}"
+REMOTE_DIR="~/deployments/skeleton-previews/${PREVIEW_SLUG}"
 
-echo "$SSH_KEY" | base64 --decode > temp_key
+echo "$SSH_KEY" > temp_key
 chmod 600 temp_key
 SSH_CMD="ssh -i temp_key -o StrictHostKeyChecking=no"
 
@@ -21,7 +21,7 @@ set -euo pipefail
 if [ -d "${REMOTE_DIR}" ]; then
   cd "${REMOTE_DIR}"
   docker compose -p "${PREVIEW_SLUG}" down -v || true
-  cd /var/www/skeleton-previews
+  cd ~/deployments/skeleton-previews
   rm -rf "${PREVIEW_SLUG}"
   echo "Cleaned preview ${PREVIEW_SLUG}"
 else

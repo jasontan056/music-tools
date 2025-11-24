@@ -66,6 +66,8 @@ echo "rsync $@" >> "${logFile}"
       SERVER_IMAGE: 'ghcr.io/acme/server:main',
       WEB_IMAGE: 'ghcr.io/acme/web:main',
       PRODUCTION_HOST_DOMAIN: 'example.com',
+      REGISTRY_USER: 'user',
+      REGISTRY_TOKEN: 'token',
       PATH: `${binDir}:${process.env.PATH}`
     } satisfies NodeJS.ProcessEnv;
 
@@ -79,7 +81,7 @@ echo "rsync $@" >> "${logFile}"
 
     const calls = readFileSync(logFile, 'utf-8');
     expect(calls).toContain('rsync -e');
-    expect(calls).toContain('/var/www/skeleton-prod/acme-testrepo-prod');
+    expect(calls).toContain('~/deployments/skeleton-prod/acme-testrepo-prod');
 
     const sshCalls = calls
       .split('\n')
@@ -90,6 +92,8 @@ echo "rsync $@" >> "${logFile}"
     expect(remoteScript).toContain('DB_COMMAND="${DB_COMMAND:-db:migrate}"');
     expect(remoteScript).toContain('RUN_SEED="${RUN_SEED:-false}"');
     expect(remoteScript).toContain('HOST_DOMAIN="${HOST_DOMAIN:-example.com}"');
+    expect(remoteScript).toContain('export REGISTRY_USER="');
+    expect(remoteScript).toContain('export REGISTRY_TOKEN="');
 
     const keyPath = path.join(repoRoot, 'temp_key');
     expect(existsSync(keyPath)).toBe(false);

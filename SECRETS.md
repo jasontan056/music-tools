@@ -10,6 +10,7 @@ Used by `scripts/deploy-preview.sh` and `scripts/cleanup-preview.sh`.
 | `PREVIEW_SSH_HOST` | IP address or hostname of your preview droplet. | `192.0.2.1` |
 | `PREVIEW_SSH_USER` | SSH username for the preview droplet. | `root` |
 | `PREVIEW_SSH_KEY` | Private SSH key (PEM format) authorized to log in as the user. | `-----BEGIN OPENSSH PRIVATE KEY-----...` |
+| `HOST_DOMAIN` | (Optional) Base domain for preview deployments. If not set, defaults to `lvh.me`. | `sotongcove.com` |
 
 ## Production Environment
 Used by `scripts/deploy-prod.sh`.
@@ -20,6 +21,7 @@ Used by `scripts/deploy-prod.sh`.
 | `PRODUCTION_SSH_USER` | SSH username for the production droplet. | `root` |
 | `PRODUCTION_SSH_KEY` | Private SSH key (PEM format) authorized to log in as the user. | `-----BEGIN OPENSSH PRIVATE KEY-----...` |
 | `PRODUCTION_HOST_DOMAIN`| Base domain for the production environment. | `example.com` |
+| `PRODUCTION_SLUG` | (Optional) Subdomain for production. Defaults to `{repo}-prod`. | `todo` |
 
 ## Registry (Optional)
 If you are using a private registry other than GHCR (which is auto-configured), or if you need to pull from a different repo.

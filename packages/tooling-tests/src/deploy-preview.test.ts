@@ -65,6 +65,9 @@ echo "rsync $@" >> "${logFile}"
       GITHUB_HEAD_REF: 'feature/test-branch',
       SERVER_IMAGE: 'ghcr.io/acme/server:sha',
       WEB_IMAGE: 'ghcr.io/acme/web:sha',
+      HOST_DOMAIN: 'example.com',
+      REGISTRY_USER: 'user',
+      REGISTRY_TOKEN: 'token',
       PATH: `${binDir}:${process.env.PATH}`
     } satisfies NodeJS.ProcessEnv;
 
@@ -81,12 +84,16 @@ echo "rsync $@" >> "${logFile}"
       .split('\n')
       .filter((line) => line.trim().startsWith('ssh '));
     expect(sshCalls).toHaveLength(2);
-    expect(calls).toContain('/var/www/skeleton-previews/acme-testrepo-feature-test-branch');
+    expect(calls).toContain('~/deployments/skeleton-previews/acme-testrepo-feature-test-branch');
 
     const scriptSource = readFileSync(path.join(repoRoot, 'scripts/deploy-preview.sh'), 'utf-8');
     expect(scriptSource).toContain('REGISTRY_TOKEN');
     expect(scriptSource).toContain('docker login ghcr.io');
     expect(scriptSource).toContain('PREVIEW_SLUG="${REPO_SLUG}-${BRANCH_SLUG}"');
+
+    const remoteScript = readFileSync(stdinLog, 'utf-8');
+    expect(remoteScript).toContain('export REGISTRY_USER="');
+    expect(remoteScript).toContain('export REGISTRY_TOKEN="');
 
     const keyPath = path.join(repoRoot, 'temp_key');
     expect(existsSync(keyPath)).toBe(false);

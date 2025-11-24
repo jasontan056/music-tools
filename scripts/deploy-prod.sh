@@ -14,11 +14,11 @@ fi
 BRANCH="${GITHUB_REF##*/}"
 REPO_SLUG=$(echo "${GITHUB_REPOSITORY:-skeleton}" | tr '[:upper:]' '[:lower:]' | tr '/' '-')
 PRODUCTION_SLUG="${PRODUCTION_SLUG:-${REPO_SLUG}-prod}"
-REMOTE_DIR="/var/www/skeleton-prod/${PRODUCTION_SLUG}"
+REMOTE_DIR="~/deployments/skeleton-prod/${PRODUCTION_SLUG}"
 
 echo "Deploying production ${PRODUCTION_SLUG}..."
 
-echo "$PRODUCTION_SSH_KEY" | base64 --decode > temp_key
+echo "$PRODUCTION_SSH_KEY" > temp_key
 chmod 600 temp_key
 SSH_CMD="ssh -i temp_key -o StrictHostKeyChecking=no"
 
@@ -32,6 +32,8 @@ rsync -e "$SSH_CMD" -az --delete \
 $SSH_CMD ${PRODUCTION_SSH_USER}@${PRODUCTION_SSH_HOST} <<SCRIPT
 set -euo pipefail
 cd ${REMOTE_DIR}
+export REGISTRY_USER="${REGISTRY_USER}"
+export REGISTRY_TOKEN="${REGISTRY_TOKEN}"
 if [[ -n "\${REGISTRY_USER:-}" && -n "\${REGISTRY_TOKEN:-}" ]]; then
   echo "\$REGISTRY_TOKEN" | docker login ghcr.io -u "\$REGISTRY_USER" --password-stdin
 fi
@@ -41,6 +43,9 @@ export COMPOSE_PROJECT_NAME="${PRODUCTION_SLUG}"
 export DB_COMMAND="\${DB_COMMAND:-db:migrate}"
 export RUN_SEED="\${RUN_SEED:-false}"
 export HOST_DOMAIN="\${HOST_DOMAIN:-${PRODUCTION_HOST_DOMAIN:-}}"
+if [[ -n "\${HOST_DOMAIN}" ]]; then
+  export WEB_URL="https://\${COMPOSE_PROJECT_NAME}.\${HOST_DOMAIN}"
+fi
 bash deploy-tasks.sh
 SCRIPT
 
