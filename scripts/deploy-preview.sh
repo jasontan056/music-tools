@@ -42,8 +42,8 @@ export SERVER_IMAGE="${SERVER_IMAGE}"
 export WEB_IMAGE="${WEB_IMAGE}"
 export COMPOSE_PROJECT_NAME="${PREVIEW_SLUG}"
 export HOST_DOMAIN="${HOST_DOMAIN:-}"
-if [[ -n "${HOST_DOMAIN}" ]]; then
-  export WEB_URL="https://${PREVIEW_SLUG}.${HOST_DOMAIN}"
+if [[ -n "\${HOST_DOMAIN}" ]]; then
+  export WEB_URL="https://\${COMPOSE_PROJECT_NAME}.\${HOST_DOMAIN}"
 fi
 bash deploy-tasks.sh
 SCRIPT
