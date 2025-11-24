@@ -111,6 +111,7 @@ jobs:
       SERVER_IMAGE: ${{ fromJSON(needs.build-and-push.outputs.server_image).tags[0] }}
       WEB_IMAGE: ${{ fromJSON(needs.build-and-push.outputs.web_image).tags[0] }}
       PRODUCTION_HOST_DOMAIN: ${{ secrets.PRODUCTION_HOST_DOMAIN }}
+      PRODUCTION_SLUG: ${{ secrets.PRODUCTION_SLUG }}
       REGISTRY_USER: ${{ github.actor }}
       REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
