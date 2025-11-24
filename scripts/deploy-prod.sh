@@ -14,7 +14,7 @@ fi
 BRANCH="${GITHUB_REF##*/}"
 REPO_SLUG=$(echo "${GITHUB_REPOSITORY:-skeleton}" | tr '[:upper:]' '[:lower:]' | tr '/' '-')
 PRODUCTION_SLUG="${PRODUCTION_SLUG:-${REPO_SLUG}-prod}"
-REMOTE_DIR="/var/www/skeleton-prod/${PRODUCTION_SLUG}"
+REMOTE_DIR="~/deployments/skeleton-prod/${PRODUCTION_SLUG}"
 
 echo "Deploying production ${PRODUCTION_SLUG}..."
 
