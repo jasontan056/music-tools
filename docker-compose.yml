@@ -27,7 +27,8 @@ services:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/skeleton
       # In preview, the webapp lives at a subdomain.
       # We use the COMPOSE_PROJECT_NAME (e.g. 'feature-login') to build the URL.
-      WEB_URL: http://${COMPOSE_PROJECT_NAME}.${HOST_DOMAIN:-lvh.me}
+      # Use https for deployed environments, http for local development
+      WEB_URL: ${WEB_URL:-http://${COMPOSE_PROJECT_NAME}.${HOST_DOMAIN:-lvh.me}}
     deploy:
       resources:
         limits:

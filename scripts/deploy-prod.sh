@@ -43,6 +43,9 @@ export COMPOSE_PROJECT_NAME="${PRODUCTION_SLUG}"
 export DB_COMMAND="\${DB_COMMAND:-db:migrate}"
 export RUN_SEED="\${RUN_SEED:-false}"
 export HOST_DOMAIN="\${HOST_DOMAIN:-${PRODUCTION_HOST_DOMAIN:-}}"
+if [[ -n "${PRODUCTION_HOST_DOMAIN}" ]]; then
+  export WEB_URL="https://${PRODUCTION_SLUG}.${PRODUCTION_HOST_DOMAIN}"
+fi
 bash deploy-tasks.sh
 SCRIPT
 

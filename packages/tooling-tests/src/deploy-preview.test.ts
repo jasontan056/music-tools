@@ -65,6 +65,7 @@ echo "rsync $@" >> "${logFile}"
       GITHUB_HEAD_REF: 'feature/test-branch',
       SERVER_IMAGE: 'ghcr.io/acme/server:sha',
       WEB_IMAGE: 'ghcr.io/acme/web:sha',
+      HOST_DOMAIN: 'example.com',
       REGISTRY_USER: 'user',
       REGISTRY_TOKEN: 'token',
       PATH: `${binDir}:${process.env.PATH}`
