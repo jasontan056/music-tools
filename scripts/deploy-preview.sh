@@ -19,7 +19,7 @@ REMOTE_DIR="/var/www/skeleton-previews/${PREVIEW_SLUG}"
 
 echo "Creating preview ${PREVIEW_SLUG}..."
 
-echo "$SSH_KEY" | base64 --decode > temp_key
+echo "$SSH_KEY" > temp_key
 chmod 600 temp_key
 SSH_CMD="ssh -i temp_key -o StrictHostKeyChecking=no"
 

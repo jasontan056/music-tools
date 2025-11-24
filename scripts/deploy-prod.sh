@@ -18,7 +18,7 @@ REMOTE_DIR="/var/www/skeleton-prod/${PRODUCTION_SLUG}"
 
 echo "Deploying production ${PRODUCTION_SLUG}..."
 
-echo "$PRODUCTION_SSH_KEY" | base64 --decode > temp_key
+echo "$PRODUCTION_SSH_KEY" > temp_key
 chmod 600 temp_key
 SSH_CMD="ssh -i temp_key -o StrictHostKeyChecking=no"
 

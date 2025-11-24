@@ -12,7 +12,7 @@ REPO_SLUG=$(echo "${GITHUB_REPOSITORY:-skeleton}" | tr '[:upper:]' '[:lower:]' |
 PREVIEW_SLUG="${REPO_SLUG}-${BRANCH_SLUG}"
 REMOTE_DIR="/var/www/skeleton-previews/${PREVIEW_SLUG}"
 
-echo "$SSH_KEY" | base64 --decode > temp_key
+echo "$SSH_KEY" > temp_key
 chmod 600 temp_key
 SSH_CMD="ssh -i temp_key -o StrictHostKeyChecking=no"
 
