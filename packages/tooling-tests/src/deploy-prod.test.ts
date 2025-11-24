@@ -79,7 +79,7 @@ echo "rsync $@" >> "${logFile}"
 
     const calls = readFileSync(logFile, 'utf-8');
     expect(calls).toContain('rsync -e');
-    expect(calls).toContain('/var/www/skeleton-prod/acme-testrepo-prod');
+    expect(calls).toContain('~/deployments/skeleton-prod/acme-testrepo-prod');
 
     const sshCalls = calls
       .split('\n')

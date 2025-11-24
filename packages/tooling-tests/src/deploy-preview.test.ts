@@ -81,7 +81,7 @@ echo "rsync $@" >> "${logFile}"
       .split('\n')
       .filter((line) => line.trim().startsWith('ssh '));
     expect(sshCalls).toHaveLength(2);
-    expect(calls).toContain('/var/www/skeleton-previews/acme-testrepo-feature-test-branch');
+    expect(calls).toContain('~/deployments/skeleton-previews/acme-testrepo-feature-test-branch');
 
     const scriptSource = readFileSync(path.join(repoRoot, 'scripts/deploy-preview.sh'), 'utf-8');
     expect(scriptSource).toContain('REGISTRY_TOKEN');
