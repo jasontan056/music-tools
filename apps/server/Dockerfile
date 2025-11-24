@@ -26,6 +26,7 @@ FROM base AS runner
 WORKDIR /app
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/apps/server/node_modules ./apps/server/node_modules
+COPY --from=deps /app/packages/db/prisma ./packages/db/prisma
 COPY --from=build /app/packages ./packages
 COPY --from=build /app/apps/server/dist ./apps/server/dist
 COPY --from=build /app/apps/server/package.json ./apps/server/package.json
