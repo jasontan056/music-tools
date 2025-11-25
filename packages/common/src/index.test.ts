@@ -1,6 +1,6 @@
 /// <reference types="vitest" />
 import { describe, it, expect } from 'vitest';
-import { formatDate, formatRelativeDate } from './index';
+import { formatDate, formatRelativeDate } from './index.js';
 
 describe('date formatting helpers', () => {
   it('formats ISO strings consistently', () => {
