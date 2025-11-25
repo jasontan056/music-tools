@@ -97,6 +97,9 @@ jobs:
   reconcile-previews:
     if: (github.event_name == 'pull_request' && github.event.action == 'closed') || github.event_name == 'schedule'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
     env:
       SSH_HOST: ${{ secrets.PREVIEW_SSH_HOST }}
       SSH_USER: ${{ secrets.PREVIEW_SSH_USER }}
