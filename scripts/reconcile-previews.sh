@@ -57,9 +57,9 @@ for dir in */; do
     PROJECT_NAME="${REPO_SLUG}-\${dir}"
     
     if docker compose ls -q | grep -q "^\${PROJECT_NAME}\$"; then
-       docker compose -p "\$PROJECT_NAME" down -v || true
+       docker compose -p "\$PROJECT_NAME" down -v --rmi all || true
     elif [ -f "docker-compose.yml" ]; then
-       docker compose -p "\$PROJECT_NAME" down -v || true
+       docker compose -p "\$PROJECT_NAME" down -v --rmi all || true
     fi
     
     cd ..
