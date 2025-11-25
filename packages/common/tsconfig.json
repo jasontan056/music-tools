@@ -4,6 +4,8 @@
     "outDir": "dist",
     "declaration": true,
     "declarationMap": true,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "paths": {}
   },
   "include": [
