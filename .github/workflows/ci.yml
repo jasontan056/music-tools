@@ -31,7 +31,7 @@ jobs:
       - run: pnpm install
       - run: pnpm build --filter=./packages/*
       - run: pnpm lint
-      - run: pnpm test || echo "No tests yet"
+      - run: pnpm test
       - run: pnpm --filter @acme/tooling-tests test
   build-and-push:
     needs: quality
