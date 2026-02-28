@@ -19,6 +19,7 @@ services:
       dockerfile: apps/server/Dockerfile
     depends_on:
       - db
+    restart: unless-stopped
     environment:
       NODE_ENV: production
       PORT: 4000
@@ -50,6 +51,7 @@ services:
 
   web:
     image: ${WEB_IMAGE:-skeleton-web}
+    restart: unless-stopped
     build:
       context: .
       dockerfile: apps/web/Dockerfile
