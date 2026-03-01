@@ -14,12 +14,12 @@ services:
 
   server:
     image: ${SERVER_IMAGE:-skeleton-server}
+    restart: unless-stopped
     build:
       context: .
       dockerfile: apps/server/Dockerfile
     depends_on:
       - db
-    restart: unless-stopped
     environment:
       NODE_ENV: production
       PORT: 4000
