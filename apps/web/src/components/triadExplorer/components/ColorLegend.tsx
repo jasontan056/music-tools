@@ -25,13 +25,12 @@ export const ColorLegend = ({
             </div>
         </div>
         <div className={styles.legendRight}>
-            <button
-                className={`${styles.overlayScaleBtn} ${showFullScale ? styles.overlayScaleBtnActive : ''}`}
-                onClick={() => setShowFullScale(!showFullScale)}
-            >
-                Scale Overlay
-            </button>
             <div className={styles.toggleBar}>
+                <button
+                    className={`${styles.toggleBtn} ${showFullScale ? styles.toggleBtnActive : ''}`}
+                    onClick={() => setShowFullScale(!showFullScale)}
+                >Scale Overlay</button>
+                <div className={styles.toggleDivider} />
                 <button
                     className={`${styles.toggleBtn} ${labelType === 'intervals' ? styles.toggleBtnActive : ''}`}
                     onClick={() => setLabelType('intervals')}

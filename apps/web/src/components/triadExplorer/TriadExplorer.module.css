@@ -527,6 +527,13 @@
   gap: 0.1rem;
 }
 
+.toggleDivider {
+  width: 1px;
+  background: #3f3f46;
+  margin: 0.2rem 0.2rem;
+  flex-shrink: 0;
+}
+
 .toggleBtn {
   flex: 1;
   padding: 0.3rem 0.4rem;
