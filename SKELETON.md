@@ -1,6 +1,6 @@
-# Skeleton Project Guide
+# Music Tools Architecture Guide
 
-This repository serves as the **Skeleton** (or template) for all future hobby apps. It is designed to be cloned and detached, while retaining the ability to pull in future improvements from the core structure.
+This repository serves as a base for building music theory and practice tools. It is designed to be extensible while sharing a common infrastructure for deployments and database management.
 
 ## 🚀 Quick Start: Creating a New App
 

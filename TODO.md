@@ -1,21 +1,14 @@
-# TODO
+# Roadmap & TODO
 
-- [ ] Configure DNS and TLS
-  - Set `HOST_DOMAIN` for production (e.g., `example.com`) and previews (e.g., `preview.example.com`).
-  - Point wildcard DNS to the droplet; enable ACME/HTTPS in Traefik.
-- [ ] Populate secrets in GitHub
-  - Preview: `PREVIEW_SSH_HOST/USER/KEY`.
-  - Production: `PRODUCTION_SSH_HOST/USER/KEY`, `PRODUCTION_HOST_DOMAIN`.
-  - Registry: `REGISTRY_USER/REGISTRY_TOKEN` (GHCR uses `${{ github.actor }}` + `${{ secrets.GITHUB_TOKEN }}` by default).
-- [ ] Prepare the droplet
-  - Install Docker + Compose, create `web_proxy` network, and run Traefik via `docker-compose.proxy.yml`.
-  - `docker login ghcr.io` if not done via the deploy script.
-- [ ] Verify prod deploy path
-  - `production-deploy` workflow should run `db:migrate` (no seed) and use `<repo>-prod` slug.
-  - Ensure external DB credentials (if used) are set on the host before deploy.
-- [ ] Preview lifecycle
-  - Confirm `preview-cleanup` runs on PR close on the droplet.
-  - Periodically prune old preview volumes if needed.
-- [ ] Optional: harden compose for production
-  - Add volume encryption/backups for Postgres.
-  - Add resource limits and healthchecks for services.
+## Infrastructure (Done)
+- [x] Configure DNS and TLS (Current: music.sotongcove.com)
+- [x] Populate secrets in GitHub (SSH keys, Gemini API Key)
+- [x] Prepare the droplet
+- [x] Preview lifecycle verification
+
+## Feature Roadmap
+- [ ] **Scale Explorer**: Interactive fretboard visualization for musical scales.
+- [ ] **Circle of Fifths**: Dynamic tool for understanding key relationships and chord progressions.
+- [ ] **Metronome & Timer**: Practice tools integrated into the dashboard.
+- [ ] **User Presets**: Allow users to save their favorite triad voicings or scale patterns.
+- [ ] **Audio Feedback**: Play guitar tones when interacting with the fretboard.

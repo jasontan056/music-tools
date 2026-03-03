@@ -1,6 +1,6 @@
-# Skeleton3 Monorepo
+# Music Tools Monorepo
 
-Modern full-stack starter that ships with a typed React + Mantine frontend, an Express + tRPC API, and a PostgreSQL database powered by Prisma. The repository demonstrates how to structure a pnpm/Turborepo mono workspace, share code between packages, and automate preview + production deployments with Docker and GitHub Actions. The guide below is formatted so another agent (or future you) can skim, copy/paste, and get productive in seconds.
+Modern full-stack application for musicians, featuring a Triad Explorer and other theory tools. Built with a typed React + Mantine frontend, an Express + tRPC API, and a PostgreSQL database powered by Prisma.
 
 ## TL;DR Checklist
 
@@ -63,7 +63,7 @@ Shared TypeScript configuration lives in `tsconfig.base.json`, while `pnpm-works
    pnpm dev
    ```
 
-Visit http://localhost:5173, sign in with `demo@example.com` / `demo1234`, and explore the authenticated todo dashboard powered by tRPC.
+Visit http://localhost:5173 to explore the Triad Explorer and other music theory tools.
 
 ## Database bootstrap
 
@@ -94,13 +94,10 @@ Each package/app also exposes its own scoped scripts (e.g. `pnpm --filter @acme/
 
 All suites run under Vitest. The API + DB integration tests rely on Docker (via Testcontainers) to launch ephemeral Postgres databases—ensure the Docker daemon is running locally or in CI before invoking them.
 
-## Application Features
-
+- **Triad Explorer** – Interactive tool for exploring guitar triad voicings across the fretboard.
 - **Credential-based auth** – Full sign-up/sign-in/logout flow with hashed passwords, session tokens, and `/auth/me` checks wired through tRPC.
-- **Session-aware backend** – Express context inspects `Authorization: Bearer <token>` headers, fetches Prisma sessions, and enforces ownership on all todo operations.
-- **Rich todo management** – Todos support statuses (Backlog, In Progress, Done), priorities, optional due dates, and are filterable/searchable. Stats cards highlight completion progress for quick triage.
-- **Demo-friendly** – Seeding creates a ready-to-use account (`demo@example.com` / `demo1234`) plus a few illustrative todos so you can show off the experience immediately.
-- **Responsive, modern UI** – Custom Mantine theme (Inter font, gradients, elevated cards) keeps the dashboard polished on mobile and desktop. Auth, stats, filters, and todos adapt to available space without extra configuration.
+- **Session-aware backend** – Express context inspects `Authorization: Bearer <token>` headers, fetches Prisma sessions.
+- **Responsive, modern UI** – Custom Mantine theme (Inter font, gradients, elevated cards) keeps the tools polished on mobile and desktop.
 
 ## Environment Reference
 
@@ -109,7 +106,7 @@ All suites run under Vitest. The API + DB integration tests rely on Docker (via 
 | `DATABASE_URL` | `.env`, `packages/db/.env`, CI secrets | Postgres connection string |
 | `WEB_URL` | `.env` | Where the server should allow CORS from (default `http://localhost:5173`) |
 | `PORT` | `.env` | API listening port (default `4000`) |
-| `AUTH_TOKEN_KEY` | `packages/common` | Frontend storage key for the session token (defaults to `skeleton3.session`) |
+| `AUTH_TOKEN_KEY` | `packages/common` | Frontend storage key for the session token (defaults to `music-tools.session`) |
 
 Session tokens are generated server-side and returned by the auth routers. The React client stores tokens in `localStorage` and automatically injects them into `Authorization` headers for every tRPC call.
 
