@@ -21,6 +21,16 @@ RUN pnpm --filter @acme/db db:generate
 RUN pnpm --filter @acme/web... build
 
 FROM nginx:1.27-alpine AS runner
+# Copy custom nginx config for SPA routing
+RUN echo 'server { \
+    listen 80; \
+    location / { \
+    root /usr/share/nginx/html; \
+    index index.html index.htm; \
+    try_files $uri $uri/ /index.html; \
+    } \
+    }' > /etc/nginx/conf.d/default.conf
+
 COPY --from=build /app/apps/web/dist /usr/share/nginx/html
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]

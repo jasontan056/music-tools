@@ -38,13 +38,13 @@ vi.mock('./lib/trpc', () => ({
 }));
 
 describe('App', () => {
-  it('renders the Triad Explorer by default without login', () => {
+  it('renders the Home page by default without login', () => {
     render(
       <MantineProvider theme={theme}>
         <App />
       </MantineProvider>
     );
 
-    expect(screen.getByText('Triad Explorer')).toBeTruthy();
+    expect(screen.getByText('Explore Triads')).toBeTruthy();
   });
 });

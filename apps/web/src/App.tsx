@@ -1,41 +1,19 @@
-import {
-  ActionIcon,
-  AppShell,
-  Avatar,
-  Badge,
-  Center,
-  Container,
-  Group,
-  Loader,
-  Stack,
-  Text,
-  Title
-} from '@mantine/core';
-import { notifications } from '@mantine/notifications';
-import { IconLogout, IconLogin } from '@tabler/icons-react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Center, Loader } from '@mantine/core';
 import { useState } from 'react';
-import { APP_TITLE } from '@acme/common';
 import { TriadExplorer } from './components/triadExplorer';
 import { AuthPanel } from './components/AuthPanel';
+import { Home } from './components/Home';
 import { useAuth } from './providers/AuthProvider';
 import { trpc } from './lib/trpc';
 
-const App = () => {
-  const { token, setToken } = useAuth();
-  const [showAuth, setShowAuth] = useState(false);
-  const utils = trpc.useUtils();
+const AppContent = () => {
+  const { token } = useAuth();
+  const [showAuth] = useState(false);
 
   const meQuery = trpc.auth.me.useQuery(undefined, {
     enabled: Boolean(token),
     retry: false
-  });
-
-  const logout = trpc.auth.logout.useMutation({
-    onSuccess: async () => {
-      setToken(null);
-      await utils.invalidate();
-      notifications.show({ title: 'Signed out', message: 'See you soon!' });
-    }
   });
 
   // If user wants to sign in, show the auth panel
@@ -52,12 +30,19 @@ const App = () => {
     );
   }
 
-  const user = meQuery.data;
-
   return (
-    <>
-      <TriadExplorer />
-    </>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/triads" element={<TriadExplorer />} />
+    </Routes>
+  );
+};
+
+const App = () => {
+  return (
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
   );
 };
 
