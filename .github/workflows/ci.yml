@@ -117,7 +117,7 @@ jobs:
           
           ALLOWED_BRANCH_SLUGS=""
           for branch in $BRANCHES; do
-            BRANCH_SLUG=$(echo "$branch" | tr '[:upper:]' '[:lower:]' | tr '/' '-')
+            BRANCH_SLUG=$(echo "$branch" | tr '[:upper:]' '[:lower:]' | tr '/_' '--')
             ALLOWED_BRANCH_SLUGS="$ALLOWED_BRANCH_SLUGS ${BRANCH_SLUG}"
           done
           
