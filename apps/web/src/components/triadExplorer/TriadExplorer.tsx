@@ -178,25 +178,14 @@ export const TriadExplorer = () => {
                 <span className={styles.chordInfoKeyName}>
                     {notesList[rootNote]} {SCALES[keyType].name}
                 </span>
-                <div className={styles.infoBarDisplayToggle}>
-                    <div className={styles.toggleBar}>
-                        <button
-                            className={`${styles.toggleBtn} ${labelType === 'intervals' ? styles.toggleBtnActive : ''}`}
-                            onClick={() => setLabelType('intervals')}
-                        >Intervals</button>
-                        <button
-                            className={`${styles.toggleBtn} ${labelType === 'notes' ? styles.toggleBtnActive : ''}`}
-                            onClick={() => setLabelType('notes')}
-                        >Notes</button>
-                    </div>
-                </div>
+
             </div>
 
             {/* Fretboard */}
             <FretboardView {...fretboardProps} />
 
-            {/* Color Legend */}
-            <ColorLegend />
+            {/* Color Legend & Display Toggle */}
+            <ColorLegend labelType={labelType} setLabelType={setLabelType} />
 
             {/* Mobile inline controls */}
             <div className={styles.mobileInlineControls}>
