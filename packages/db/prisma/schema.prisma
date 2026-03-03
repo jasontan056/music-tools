@@ -12,42 +12,16 @@ enum UserRole {
   ADMIN
 }
 
-enum TodoStatus {
-  BACKLOG
-  IN_PROGRESS
-  DONE
-}
-
-enum TodoPriority {
-  LOW
-  MEDIUM
-  HIGH
-}
-
 model User {
   id           String    @id @default(cuid())
   email        String    @unique
   name         String?
   passwordHash String
   role         UserRole  @default(USER)
-  todos        Todo[]
   sessions     Session[]
   lastLoginAt  DateTime?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
-}
-
-model Todo {
-  id          String       @id @default(cuid())
-  title       String
-  description String?
-  status      TodoStatus   @default(BACKLOG)
-  priority    TodoPriority @default(MEDIUM)
-  dueAt       DateTime?
-  owner       User         @relation(fields: [ownerId], references: [id])
-  ownerId     String
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
 }
 
 model Session {

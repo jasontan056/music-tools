@@ -1,0 +1,792 @@
+.triadRoot {
+  min-height: 100vh;
+  background: #0a0a0c;
+  color: #e5e5e5;
+  font-family: InterVariable, Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* ——— Header ——— */
+.header {
+  border-bottom: 1px solid #262626;
+  padding: 0.75rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.headerTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+
+/* ——— Chord Info Bar ——— */
+.chordInfoBar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 1.25rem;
+  border-bottom: 1px solid #1a1a1a;
+  background: #111113;
+  overflow-x: auto;
+}
+
+.chordInfoName {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #fff;
+  white-space: nowrap;
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+}
+
+.chordInfoDegree {
+  color: #818cf8;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.chordInfoQuality {
+  font-size: 0.9rem;
+  color: #818cf8;
+}
+
+.chordInfoSpelling {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.spellingChip {
+  background: #262626;
+  border-radius: 0.3rem;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #e5e5e5;
+}
+
+.chordInfoIntervals {
+  display: flex;
+  gap: 0.3rem;
+  align-items: center;
+}
+
+.intervalChip {
+  border: 1px solid #3f3f46;
+  border-radius: 0.3rem;
+  padding: 0.15rem 0.45rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #a3a3a3;
+}
+
+.chordInfoDivider {
+  width: 1px;
+  height: 28px;
+  background: #333;
+  flex-shrink: 0;
+}
+
+/* Display toggle in info bar */
+.infoBarDisplayToggle {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* ——— Accidental Toggle (in Key Center panel) ——— */
+.accidentalBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.65rem;
+  color: #737373;
+  background: #262626;
+  border: none;
+  border-radius: 0.25rem;
+  padding: 0.15rem 0.4rem;
+  cursor: pointer;
+  transition: color 0.15s ease;
+  font-family: inherit;
+}
+
+.accidentalBtn:hover {
+  color: #fff;
+}
+
+/* ——— Fretboard ——— */
+.fretboardWrapper {
+  padding: 0.75rem 1.25rem;
+  overflow-x: auto;
+}
+
+.fretboardWrapper::-webkit-scrollbar {
+  height: 8px;
+}
+
+.fretboardWrapper::-webkit-scrollbar-track {
+  background: #18181b;
+  border-radius: 4px;
+}
+
+.fretboardWrapper::-webkit-scrollbar-thumb {
+  background: #3f3f46;
+  border-radius: 4px;
+}
+
+.fretboardWrapper::-webkit-scrollbar-thumb:hover {
+  background: #52525b;
+}
+
+.fretboard {
+  position: relative;
+  min-width: 900px;
+  height: 220px;
+  background: linear-gradient(to right, #18181b, #27272a);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
+  border: 2px solid #0a0a0a;
+}
+
+.fretNut {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4%;
+  height: 100%;
+  background: #d4d4d4;
+  border-right: 4px solid #0a0a0a;
+  z-index: 0;
+}
+
+.fretColumn {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 6.4%;
+  border-right: 3px solid #111;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.inlayDot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(115, 115, 115, 0.35);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.doubleInlay {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+.string {
+  position: absolute;
+  width: 100%;
+  z-index: 0;
+  transition: opacity 0.3s ease;
+  background: linear-gradient(to bottom, #a3a3a3, #737373);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.fretNumbers {
+  position: absolute;
+  bottom: 3px;
+  width: 100%;
+  display: flex;
+  color: #525252;
+  font-weight: 700;
+  font-size: 0.65rem;
+  pointer-events: none;
+}
+
+.fretNumNut {
+  width: 4%;
+  text-align: center;
+  opacity: 0;
+}
+
+.fretNum {
+  width: 6.4%;
+  text-align: center;
+}
+
+/* Nodes */
+.nodeBase {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  transform: translate(-50%, -50%);
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+@media (min-width: 768px) {
+  .nodeBase {
+    width: 30px;
+    height: 30px;
+    font-size: 0.7rem;
+  }
+}
+
+.nodeTriad {
+  z-index: 20;
+}
+
+.nodeRoot {
+  background: #ef4444;
+  color: #fff;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.8);
+  border: 2px solid #fca5a5;
+}
+
+.nodeThird {
+  background: #3b82f6;
+  color: #fff;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.8);
+  border: 2px solid #93c5fd;
+}
+
+.nodeFifth {
+  background: #facc15;
+  color: #000;
+  box-shadow: 0 0 10px rgba(250, 204, 21, 0.8);
+  border: 2px solid #fef08a;
+}
+
+.nodeScale {
+  background: #262626;
+  color: #a3a3a3;
+  border: 2px solid #525252;
+}
+
+.scaleDot {
+  position: absolute;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.3s ease;
+  z-index: 5;
+}
+
+.scaleDotRoot {
+  width: 10px;
+  height: 10px;
+  background: #a3a3a3;
+}
+
+.scaleDotNormal {
+  width: 6px;
+  height: 6px;
+  background: #525252;
+}
+
+.emptyState {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 30;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+}
+
+.emptyCard {
+  padding: 0.75rem 1.25rem;
+  background: #171717;
+  border-radius: 0.5rem;
+  color: #d4d4d4;
+  font-weight: 500;
+  border: 1px solid #3f3f46;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+}
+
+/* ——— Controls Section (desktop) ——— */
+.controlsSection {
+  padding: 0 1.25rem 1.25rem;
+}
+
+.controlsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 0.75rem;
+}
+
+@media (max-width: 1100px) {
+  .controlsGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ——— Panels ——— */
+.panel {
+  background: #171717;
+  border: 1px solid #262626;
+  border-radius: 0.65rem;
+  padding: 0.75rem;
+}
+
+.panelLabel {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #737373;
+  margin-bottom: 0.45rem;
+}
+
+/* ——— Note Selector: 6-column grid ——— */
+.noteGrid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.3rem;
+}
+
+.noteBtn {
+  height: 34px;
+  border: none;
+  border-radius: 0.35rem;
+  font-weight: 700;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  background: #262626;
+  color: #d4d4d4;
+  font-family: inherit;
+}
+
+.noteBtn:hover {
+  background: #3f3f46;
+}
+
+.noteBtnActive {
+  background: #fff;
+  color: #000;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.25);
+}
+
+/* ——— Chord Degree Buttons ——— */
+.chordGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.3rem;
+}
+
+.chordBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.1rem;
+  border-radius: 0.35rem;
+  border: 1px solid #3f3f46;
+  background: #262626;
+  color: #d4d4d4;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.chordBtn:hover {
+  background: #3f3f46;
+  border-color: #525252;
+}
+
+.chordBtnActive {
+  background: #4f46e5;
+  color: #fff;
+  border-color: #6366f1;
+}
+
+.chordDegree {
+  font-weight: 700;
+  font-size: 0.85rem;
+  line-height: 1.2;
+}
+
+.chordSubtext {
+  font-size: 0.55rem;
+  margin-top: 0.05rem;
+  color: #a5b4fc;
+}
+
+.chordBtn:not(.chordBtnActive) .chordSubtext {
+  color: #737373;
+}
+
+.scaleBtnActive {
+  background: #525252;
+  color: #fff;
+  border-color: #737373;
+}
+
+/* ——— Toggle Bar ——— */
+.toggleBar {
+  display: flex;
+  background: #262626;
+  border-radius: 0.35rem;
+  padding: 0.15rem;
+  gap: 0.1rem;
+}
+
+.toggleBtn {
+  flex: 1;
+  padding: 0.3rem 0.4rem;
+  border: none;
+  border-radius: 0.3rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  background: transparent;
+  color: #a3a3a3;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.toggleBtn:hover {
+  color: #fff;
+}
+
+.toggleBtnActive {
+  background: #3f3f46;
+  color: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+/* ——— Filter Buttons ——— */
+.filterStack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.filterBtn {
+  padding: 0.4rem 0.6rem;
+  border: none;
+  border-radius: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+  background: #262626;
+  color: #a3a3a3;
+  font-family: inherit;
+}
+
+.filterBtn:hover {
+  background: #3f3f46;
+}
+
+.filterBtnActive {
+  background: #4f46e5;
+  color: #fff;
+}
+
+/* ——— Mobile inline controls ——— */
+.mobileInlineControls {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .mobileInlineControls {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding: 0.5rem 0.75rem;
+  }
+}
+
+/* ——— Mobile FAB ——— */
+.mobileControlsToggle {
+  display: none;
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #4f46e5;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  z-index: 200;
+  box-shadow: 0 4px 16px rgba(79, 70, 229, 0.5);
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+.mobileControlsToggle:active {
+  transform: scale(0.92);
+}
+
+@media (max-width: 900px) {
+  .mobileControlsToggle {
+    display: flex;
+  }
+}
+
+/* Mobile overlay */
+.mobileOverlay {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .mobileOverlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 150;
+    animation: fadeIn 0.2s ease;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* Mobile bottom sheet */
+.mobileSheet {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .mobileSheet {
+    display: block;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-height: 75vh;
+    overflow-y: auto;
+    background: #111113;
+    border-top: 1px solid #333;
+    border-radius: 1.25rem 1.25rem 0 0;
+    padding: 1rem 1rem 5rem;
+    z-index: 160;
+    animation: slideUp 0.25s ease;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}
+
+.mobileSheetGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.mobileSheetRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+
+/* Desktop controls hidden on mobile */
+@media (max-width: 900px) {
+  .controlsSection {
+    display: none;
+  }
+
+  .chordInfoBar {
+    padding: 0.4rem 0.75rem;
+    gap: 0.6rem;
+  }
+
+  .chordInfoName {
+    font-size: 1.2rem;
+  }
+
+  .chordInfoDegree {
+    font-size: 0.85rem;
+  }
+
+  .chordInfoQuality {
+    font-size: 0.75rem;
+  }
+
+  .fretboardWrapper {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .header {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .headerTitle {
+    font-size: 1.15rem;
+  }
+}
+
+/* ——— Short viewport (landscape mobile) ——— */
+@media (max-height: 500px) {
+  .header {
+    padding: 0.2rem 0.75rem;
+  }
+
+  .headerTitle {
+    font-size: 0.95rem;
+  }
+
+  .chordInfoBar {
+    padding: 0.2rem 0.75rem;
+    gap: 0.4rem;
+  }
+
+  .chordInfoName {
+    font-size: 0.95rem;
+  }
+
+  .chordInfoDegree {
+    font-size: 0.7rem;
+  }
+
+  .chordInfoQuality {
+    font-size: 0.65rem;
+  }
+
+  .spellingChip {
+    font-size: 0.7rem;
+    padding: 0.1rem 0.35rem;
+  }
+
+  .intervalChip {
+    font-size: 0.6rem;
+    padding: 0.1rem 0.3rem;
+  }
+
+  .chordInfoDivider {
+    height: 20px;
+  }
+
+  .fretboardWrapper {
+    padding: 0.25rem 0.75rem;
+  }
+
+  .fretboard {
+    height: 150px;
+  }
+
+  .nodeBase {
+    width: 20px;
+    height: 20px;
+    font-size: 0.55rem;
+  }
+
+  .scaleDotRoot {
+    width: 7px;
+    height: 7px;
+  }
+
+  .scaleDotNormal {
+    width: 4px;
+    height: 4px;
+  }
+
+  .inlayDot {
+    width: 12px;
+    height: 12px;
+  }
+
+  .doubleInlay {
+    gap: 24px;
+  }
+
+  .mobileInlineControls {
+    flex-direction: row;
+    gap: 0.4rem;
+    padding: 0.25rem 0.75rem;
+    overflow-x: auto;
+  }
+
+  .mobileInlineControls>* {
+    min-width: 0;
+    flex: 1 1 180px;
+  }
+
+  .mobileControlsToggle {
+    width: 40px;
+    height: 40px;
+    bottom: 0.5rem;
+    right: 0.5rem;
+  }
+
+  .panel {
+    padding: 0.5rem;
+  }
+
+  .panelLabel {
+    font-size: 0.55rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .noteBtn {
+    height: 28px;
+    font-size: 0.7rem;
+  }
+
+  .noteGrid {
+    gap: 0.2rem;
+  }
+
+  .chordGrid {
+    gap: 0.2rem;
+  }
+
+  .chordDegree {
+    font-size: 0.75rem;
+  }
+
+  .chordSubtext {
+    font-size: 0.5rem;
+  }
+
+  .chordBtn {
+    padding: 0.2rem 0.05rem;
+  }
+
+  .toggleBtn {
+    font-size: 0.6rem;
+    padding: 0.2rem 0.3rem;
+  }
+}
