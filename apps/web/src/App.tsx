@@ -15,7 +15,7 @@ import { notifications } from '@mantine/notifications';
 import { IconLogout, IconLogin } from '@tabler/icons-react';
 import { useState } from 'react';
 import { APP_TITLE } from '@acme/common';
-import { TriadExplorer } from './components/TriadExplorer';
+import { TriadExplorer } from './components/triadExplorer';
 import { AuthPanel } from './components/AuthPanel';
 import { useAuth } from './providers/AuthProvider';
 import { trpc } from './lib/trpc';

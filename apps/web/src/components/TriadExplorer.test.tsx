@@ -9,8 +9,8 @@ import {
     TUNING,
     STRING_SETS,
     INVERSIONS
-} from './TriadExplorer';
-import type { ScaleKey, FormulaKey, Shape, ShapeNode } from './TriadExplorer';
+} from './triadExplorer';
+import type { ScaleKey, FormulaKey, Shape, ShapeNode } from './triadExplorer';
 
 describe('TriadExplorer Logic', () => {
     describe('computeScaleNodes', () => {

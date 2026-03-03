@@ -120,6 +120,13 @@
   flex-shrink: 0;
 }
 
+/* Chord info key name */
+.chordInfoKeyName {
+  font-size: 0.7rem;
+  color: #737373;
+  white-space: nowrap;
+}
+
 /* Display toggle in info bar */
 .infoBarDisplayToggle {
   margin-left: auto;
@@ -400,7 +407,14 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: #737373;
-  margin-bottom: 0.45rem;
+  margin-bottom: 0;
+}
+
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.35rem;
 }
 
 /* ——— Note Selector: 6-column grid ——— */
