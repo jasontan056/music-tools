@@ -130,7 +130,7 @@ export const TriadExplorer = () => {
     const keyCenterProps = { notesList, rootNote, setRootNote, accidental, setAccidental };
     const chordsProps = {
         notesList, rootNote, keyType, setKeyType,
-        activeDegree, setActiveDegree, showFullScale, setShowFullScale
+        activeDegree, setActiveDegree
     };
     const filtersProps = { stringSet, setStringSet, inversion, setInversion };
 
@@ -185,7 +185,12 @@ export const TriadExplorer = () => {
             <FretboardView {...fretboardProps} />
 
             {/* Color Legend & Display Toggle */}
-            <ColorLegend labelType={labelType} setLabelType={setLabelType} />
+            <ColorLegend
+                labelType={labelType}
+                setLabelType={setLabelType}
+                showFullScale={showFullScale}
+                setShowFullScale={setShowFullScale}
+            />
 
             {/* Mobile inline controls */}
             <div className={styles.mobileInlineControls}>

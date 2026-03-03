@@ -10,13 +10,10 @@ interface ChordsPanelProps {
     setKeyType: (v: ScaleKey) => void;
     activeDegree: number;
     setActiveDegree: (v: number) => void;
-    showFullScale: boolean;
-    setShowFullScale: (v: boolean) => void;
 }
 
 export const ChordsPanel = ({
     notesList, rootNote, keyType, setKeyType, activeDegree, setActiveDegree,
-    showFullScale, setShowFullScale
 }: ChordsPanelProps) => (
     <div className={styles.panel}>
         <div className={styles.panelHeader}>
@@ -48,13 +45,6 @@ export const ChordsPanel = ({
                     </button>
                 );
             })}
-            <button
-                onClick={() => setShowFullScale(!showFullScale)}
-                className={`${styles.chordBtn} ${showFullScale ? styles.scaleBtnActive : ''}`}
-            >
-                <span className={styles.chordDegree}>Scale</span>
-                <span className={styles.chordSubtext}>Overlay</span>
-            </button>
         </div>
     </div>
 );

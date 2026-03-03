@@ -488,6 +488,36 @@
   border-color: #737373;
 }
 
+.overlayScaleBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.8rem;
+  background: #262626;
+  border: 1px solid #3f3f46;
+  border-radius: 0.35rem;
+  color: #d4d4d4;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.overlayScaleBtn:hover {
+  background: #3f3f46;
+  color: #fff;
+  border-color: #525252;
+}
+
+.overlayScaleBtnActive {
+  background: #4f46e5;
+  color: #fff;
+  border-color: #6366f1;
+  box-shadow: 0 0 10px rgba(79, 70, 229, 0.25);
+}
+
 /* ——— Toggle Bar ——— */
 .toggleBar {
   display: flex;
@@ -588,6 +618,9 @@
 
 .legendRight {
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .legendItem {

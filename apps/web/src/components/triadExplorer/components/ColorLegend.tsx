@@ -4,9 +4,13 @@ import { LEGEND_ITEMS } from '../constants';
 interface ColorLegendProps {
     labelType: 'intervals' | 'notes';
     setLabelType: (val: 'intervals' | 'notes') => void;
+    showFullScale: boolean;
+    setShowFullScale: (val: boolean) => void;
 }
 
-export const ColorLegend = ({ labelType, setLabelType }: ColorLegendProps) => (
+export const ColorLegend = ({
+    labelType, setLabelType, showFullScale, setShowFullScale
+}: ColorLegendProps) => (
     <div className={styles.legend}>
         <div className={styles.legendLeft}>
             {LEGEND_ITEMS.map((item) => (
@@ -21,6 +25,12 @@ export const ColorLegend = ({ labelType, setLabelType }: ColorLegendProps) => (
             </div>
         </div>
         <div className={styles.legendRight}>
+            <button
+                className={`${styles.overlayScaleBtn} ${showFullScale ? styles.overlayScaleBtnActive : ''}`}
+                onClick={() => setShowFullScale(!showFullScale)}
+            >
+                Scale Overlay
+            </button>
             <div className={styles.toggleBar}>
                 <button
                     className={`${styles.toggleBtn} ${labelType === 'intervals' ? styles.toggleBtnActive : ''}`}
