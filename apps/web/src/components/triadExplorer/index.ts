@@ -8,5 +8,5 @@ export {
     NUM_STRINGS, MAX_FRET, NUM_SEMITONES, MAX_FRET_SPAN
 } from './constants';
 export {
-    computeScaleNodes, computeShapes, computeChordTones, deduplicateNodes
+    computeScaleNodes, computeShapes, deduplicateNodes
 } from './logic';

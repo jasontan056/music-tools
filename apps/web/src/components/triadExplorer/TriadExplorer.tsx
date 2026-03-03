@@ -9,7 +9,7 @@ import type { ScaleKey } from './types';
 import { FORMULAS, SCALES, SHARPS, FLATS, NUM_SEMITONES } from './constants';
 
 // Logic
-import { computeScaleNodes, computeShapes, computeChordTones, deduplicateNodes } from './logic';
+import { computeScaleNodes, computeShapes, deduplicateNodes } from './logic';
 
 // URL State
 import { parseHash, updateHash } from './urlState';
@@ -84,12 +84,7 @@ export const TriadExplorer = () => {
     );
     const uniqueNodes = useMemo(() => deduplicateNodes(shapes), [shapes]);
 
-    // Ghost chord tones: all R/3/5 positions NOT already in a voicing shape
-    const ghostNodes = useMemo(() => {
-        const allChordTones = computeChordTones(effectiveRoot, effectiveQuality);
-        const voicingSet = new Set(uniqueNodes.map((n) => `${n.string}-${n.fret}`));
-        return allChordTones.filter((n) => !voicingSet.has(`${n.string}-${n.fret}`));
-    }, [effectiveRoot, effectiveQuality, uniqueNodes]);
+
 
     // Keyboard shortcuts — uses functional state setters so the empty deps array is safe
     const handleKeyDown = useCallback((e: KeyboardEvent) => {
@@ -127,7 +122,7 @@ export const TriadExplorer = () => {
     }, [handleKeyDown]);
 
     const fretboardProps = {
-        scaleNodes, uniqueNodes, ghostNodes, shapes, keyType, rootNote, activeDegree,
+        scaleNodes, uniqueNodes, shapes, keyType, rootNote, activeDegree,
         effectiveRoot, effectiveQuality, stringSet, showFullScale, labelType, notesList
     };
 

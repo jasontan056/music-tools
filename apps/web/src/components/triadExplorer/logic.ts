@@ -94,21 +94,7 @@ export const deduplicateNodes = (shapes: Shape[]): ShapeNode[] => {
     return list;
 };
 
-export const computeChordTones = (effectiveRoot: number, effectiveQuality: FormulaKey): ShapeNode[] => {
-    const formula = FORMULAS[effectiveQuality];
-    const targetNotes = formula.intervals.map((int) => (effectiveRoot + int) % NUM_SEMITONES);
-    const list: ShapeNode[] = [];
-    for (let s = 0; s < NUM_STRINGS; s++) {
-        for (let f = 0; f <= MAX_FRET; f++) {
-            const note = (TUNING[s] + f) % NUM_SEMITONES;
-            const intervalIdx = targetNotes.indexOf(note);
-            if (intervalIdx !== -1) {
-                list.push({ string: s, fret: f, intervalIdx });
-            }
-        }
-    }
-    return list;
-};
+
 
 /** Build a Set<string> key for O(1) chord tone lookups in the fretboard renderer. */
 export const buildNodeSet = (nodes: ShapeNode[]): Set<string> =>

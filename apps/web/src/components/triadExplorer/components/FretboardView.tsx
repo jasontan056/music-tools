@@ -17,13 +17,6 @@ const getNodeColorClass = (intervalIdx: number) => {
     return '';
 };
 
-const getGhostColorClass = (intervalIdx: number) => {
-    if (intervalIdx === 0) return styles.ghostRoot;
-    if (intervalIdx === 1) return styles.ghostThird;
-    if (intervalIdx === 2) return styles.ghostFifth;
-    return '';
-};
-
 /** Safely check if a string index is active for the current string set. */
 const isStringActive = (stringSet: string, stringIdx: number): boolean => {
     if (stringSet === 'all') return true;
@@ -31,11 +24,9 @@ const isStringActive = (stringSet: string, stringIdx: number): boolean => {
     return strings ? strings.includes(stringIdx) : true;
 };
 
-// --- Props ---
 interface FretboardViewProps {
     scaleNodes: ScaleNode[];
     uniqueNodes: ShapeNode[];
-    ghostNodes: ShapeNode[];
     shapes: Shape[];
     keyType: ScaleKey;
     rootNote: number;
@@ -49,14 +40,13 @@ interface FretboardViewProps {
 }
 
 export const FretboardView = ({
-    scaleNodes, uniqueNodes, ghostNodes, shapes, keyType, rootNote, activeDegree,
+    scaleNodes, uniqueNodes, shapes, keyType, rootNote, activeDegree,
     effectiveRoot, effectiveQuality, stringSet, showFullScale, labelType, notesList
 }: FretboardViewProps) => {
     const formula = FORMULAS[effectiveQuality];
 
-    // O(1) chord tone lookup sets
+    // O(1) chord tone lookup set (for current voicing)
     const voicingSet = buildNodeSet(uniqueNodes);
-    const ghostSet = buildNodeSet(ghostNodes);
 
     return (
         <div className={styles.fretboardWrapper}>
@@ -93,9 +83,9 @@ export const FretboardView = ({
                 </div>
                 {scaleNodes.map((node) => {
                     const active = isStringActive(stringSet, node.string);
-                    const isChordTone = voicingSet.has(`${node.string}-${node.fret}`) || ghostSet.has(`${node.string}-${node.fret}`);
+                    const isVoicingNode = voicingSet.has(`${node.string}-${node.fret}`);
 
-                    if (isChordTone) return null;
+                    if (isVoicingNode) return null;
 
                     if (!showFullScale) {
                         return (
@@ -116,18 +106,7 @@ export const FretboardView = ({
                         </div>
                     );
                 })}
-                {ghostNodes.map((node, idx) => {
-                    const active = isStringActive(stringSet, node.string);
-                    return (
-                        <div
-                            key={`ghost-${node.string}-${node.fret}-${idx}`}
-                            className={`${styles.nodeBase} ${styles.nodeGhost} ${getGhostColorClass(node.intervalIdx)}`}
-                            style={{ left: `${getColCenter(node.fret)}%`, top: `${getRowCenter(node.string)}%`, opacity: active ? 1 : 0.4 }}
-                        >
-                            {labelType === 'intervals' ? formula.labels[node.intervalIdx] : notesList[(effectiveRoot + formula.intervals[node.intervalIdx]) % NUM_SEMITONES]}
-                        </div>
-                    );
-                })}
+
                 {uniqueNodes.map((node, idx) => {
                     const scaleIntervalSemitones = formula.intervals[node.intervalIdx];
                     const scaleIdx = (SCALES[keyType].intervals as readonly number[]).indexOf(
