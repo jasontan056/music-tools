@@ -12,7 +12,7 @@ if [[ -z "${SERVER_IMAGE:-}" || -z "${WEB_IMAGE:-}" ]]; then
 fi
 
 BRANCH="${GITHUB_HEAD_REF:-${GITHUB_REF##*/}}"
-BRANCH_SLUG=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | tr '/' '-')
+BRANCH_SLUG=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | tr '/_' '--')
 REPO_SLUG=$(echo "${GITHUB_REPOSITORY:-skeleton}" | tr '[:upper:]' '[:lower:]' | tr '/' '-')
 PREVIEW_SLUG="${REPO_SLUG}-${BRANCH_SLUG}"
 REMOTE_DIR="~/deployments/skeleton-previews/${REPO_SLUG}/${BRANCH_SLUG}"
