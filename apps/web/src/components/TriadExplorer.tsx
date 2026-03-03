@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { Settings2, Music, Hash, SlidersHorizontal, X } from 'lucide-react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
+import { Music, Hash, SlidersHorizontal, X, HelpCircle } from 'lucide-react';
 import styles from './TriadExplorer.module.css';
 
 // --- CONSTANTS & MUSICAL DATA ---
@@ -7,10 +7,10 @@ const SHARPS = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 const FLATS = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
 
 export const FORMULAS = {
-    major: { name: 'Major', intervals: [0, 4, 7], labels: ['R', '3', '5'] },
-    minor: { name: 'Minor', intervals: [0, 3, 7], labels: ['R', 'b3', '5'] },
-    diminished: { name: 'Diminished', intervals: [0, 3, 6], labels: ['R', 'b3', 'b5'] },
-    augmented: { name: 'Augmented', intervals: [0, 4, 8], labels: ['R', '3', '#5'] }
+    major: { name: 'Major', abbr: 'Maj', intervals: [0, 4, 7], labels: ['R', '3', '5'] },
+    minor: { name: 'Minor', abbr: 'Min', intervals: [0, 3, 7], labels: ['R', 'b3', '5'] },
+    diminished: { name: 'Diminished', abbr: 'Dim', intervals: [0, 3, 6], labels: ['R', 'b3', 'b5'] },
+    augmented: { name: 'Augmented', abbr: 'Aug', intervals: [0, 4, 8], labels: ['R', '3', '#5'] }
 } as const;
 
 export type FormulaKey = keyof typeof FORMULAS;
@@ -109,45 +109,52 @@ export const computeShapes = (
     const result: Shape[] = [];
     const formula = FORMULAS[effectiveQuality];
     const targetNotes = formula.intervals.map((interval) => (effectiveRoot + interval) % 12);
-    const activeSets = stringSet === 'all' ? STRING_SETS.filter((s) => s.id !== 'all') : STRING_SETS.filter((s) => s.id === stringSet);
-    const activeInvs = inversion === 'all' ? INVERSIONS.filter((i) => i.id !== 'all') : INVERSIONS.filter((i) => i.id === inversion);
+
+    const activeSets = stringSet === 'all'
+        ? STRING_SETS.filter((s) => s.id !== 'all')
+        : STRING_SETS.filter((s) => s.id === stringSet);
+    const activeInvs = inversion === 'all'
+        ? INVERSIONS.filter((i) => i.id !== 'all')
+        : INVERSIONS.filter((i) => i.id === inversion);
 
     activeSets.forEach((set) => {
         activeInvs.forEach((inv) => {
             const reqIntervals = inv.order;
-            const [str0, str1, str2] = set.strings;
-            for (let f0 = 0; f0 <= 15; f0++) {
-                if ((TUNING[str0] + f0) % 12 === targetNotes[reqIntervals[0]]) {
-                    for (let f1 = 0; f1 <= 15; f1++) {
-                        if ((TUNING[str1] + f1) % 12 === targetNotes[reqIntervals[1]]) {
-                            for (let f2 = 0; f2 <= 15; f2++) {
-                                if ((TUNING[str2] + f2) % 12 === targetNotes[reqIntervals[2]]) {
-                                    const frets = [f0, f1, f2];
-                                    const activeFrets = frets.filter((f) => f > 0);
-                                    let isValidShape = false;
-                                    if (frets.includes(0)) {
-                                        if (activeFrets.length === 0 || Math.max(...activeFrets) <= 4) isValidShape = true;
-                                    } else {
-                                        const span = Math.max(...frets) - Math.min(...frets);
-                                        if (span <= 4) isValidShape = true;
-                                    }
-                                    if (isValidShape) {
-                                        result.push({
-                                            id: `${set.id}-${inv.id}-${f0}-${f1}-${f2}`,
-                                            inversionId: inv.id,
-                                            nodes: [
-                                                { string: str0, fret: f0, intervalIdx: reqIntervals[0] },
-                                                { string: str1, fret: f1, intervalIdx: reqIntervals[1] },
-                                                { string: str2, fret: f2, intervalIdx: reqIntervals[2] }
-                                            ]
-                                        });
-                                    }
-                                }
-                            }
-                        }
+            const noteCount = set.strings.length;
+
+            const findFrets = (idx: number, frets: number[]): void => {
+                if (idx === noteCount) {
+                    const activeFrets = frets.filter((f) => f > 0);
+                    let isValid = false;
+                    if (frets.includes(0)) {
+                        if (activeFrets.length === 0 || Math.max(...activeFrets) <= 4) isValid = true;
+                    } else {
+                        const span = Math.max(...frets) - Math.min(...frets);
+                        if (span <= 4) isValid = true;
+                    }
+                    if (isValid) {
+                        result.push({
+                            id: `${set.id}-${inv.id}-${frets.join('-')}`,
+                            inversionId: inv.id,
+                            nodes: frets.map((f, i) => ({
+                                string: set.strings[i],
+                                fret: f,
+                                intervalIdx: reqIntervals[i]
+                            }))
+                        });
+                    }
+                    return;
+                }
+                const str = set.strings[idx];
+                const wantedNote = targetNotes[reqIntervals[idx]];
+                for (let f = 0; f <= 15; f++) {
+                    if ((TUNING[str] + f) % 12 === wantedNote) {
+                        findFrets(idx + 1, [...frets, f]);
                     }
                 }
-            }
+            };
+
+            findFrets(0, []);
         });
     });
     return result;
@@ -168,6 +175,22 @@ export const deduplicateNodes = (shapes: Shape[]): ShapeNode[] => {
     return list;
 };
 
+// --- URL HASH STATE ---
+const parseHash = (): Record<string, string> => {
+    const hash = window.location.hash.slice(1);
+    if (!hash) return {};
+    const params = new URLSearchParams(hash);
+    const result: Record<string, string> = {};
+    params.forEach((v, k) => { result[k] = v; });
+    return result;
+};
+
+const updateHash = (state: Record<string, string>) => {
+    const params = new URLSearchParams(state);
+    const hash = params.toString();
+    window.history.replaceState(null, '', hash ? `#${hash}` : window.location.pathname);
+};
+
 // --- RENDERING HELPERS ---
 const getColCenter = (fret: number) => (fret === 0 ? 2 : 4 + (fret - 1) * 6.4 + 3.2);
 const getRowCenter = (stringIdx: number) => 10 + (5 - stringIdx) * 16;
@@ -179,9 +202,58 @@ const getNodeColorClass = (intervalIdx: number) => {
     return '';
 };
 
+const LEGEND_ITEMS = [
+    { label: 'Root', cls: 'nodeRoot' },
+    { label: '3rd', cls: 'nodeThird' },
+    { label: '5th', cls: 'nodeFifth' }
+];
+
 const INLAY_FRETS = [3, 5, 7, 9, 15];
 
-// --- KEY CENTER PANEL (♭/♯ toggle inside) ---
+const SHORTCUTS = [
+    { keys: '1 – 7', desc: 'Select chord degree' },
+    { keys: '8', desc: 'Toggle scale overlay' },
+    { keys: '← →', desc: 'Cycle root note' },
+    { keys: '↑ ↓', desc: 'Toggle Major / Minor' },
+    { keys: 'N', desc: 'Toggle Notes / Intervals' },
+    { keys: '?', desc: 'Show / hide shortcuts' }
+];
+
+// --- COLOR LEGEND ---
+const ColorLegend = () => (
+    <div className={styles.legend}>
+        {LEGEND_ITEMS.map((item) => (
+            <div key={item.cls} className={styles.legendItem}>
+                <div className={`${styles.legendDot} ${styles[item.cls]}`} />
+                <span>{item.label}</span>
+            </div>
+        ))}
+        <div className={styles.legendItem}>
+            <div className={`${styles.legendDot} ${styles.nodeScale}`} />
+            <span>Scale</span>
+        </div>
+    </div>
+);
+
+// --- SHORTCUTS OVERLAY ---
+const ShortcutHelp = ({ onClose }: { onClose: () => void }) => (
+    <div className={styles.shortcutOverlay} onClick={onClose}>
+        <div className={styles.shortcutCard} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.shortcutHeader}>
+                <span>Keyboard Shortcuts</span>
+                <button className={styles.shortcutClose} onClick={onClose}><X size={16} /></button>
+            </div>
+            {SHORTCUTS.map((s) => (
+                <div key={s.keys} className={styles.shortcutRow}>
+                    <kbd className={styles.kbd}>{s.keys}</kbd>
+                    <span>{s.desc}</span>
+                </div>
+            ))}
+        </div>
+    </div>
+);
+
+// --- KEY CENTER PANEL ---
 const KeyCenterPanel = ({
     notesList, rootNote, setRootNote, accidental, setAccidental
 }: {
@@ -254,7 +326,7 @@ const ChordsPanel = ({
                     >
                         <span className={styles.chordDegree}>{chord.degree}</span>
                         <span className={styles.chordSubtext}>
-                            {notesList[chordRoot]}{FORMULAS[chord.quality].name.substring(0, 3)}
+                            {notesList[chordRoot]}{FORMULAS[chord.quality].abbr}
                         </span>
                     </button>
                 );
@@ -278,34 +350,42 @@ const FiltersPanel = ({
     setStringSet: (v: string) => void;
     inversion: string;
     setInversion: (v: string) => void;
-}) => (
-    <>
-        <div className={styles.panel}>
-            <span className={styles.panelLabel}>String Set</span>
-            <div className={styles.filterStack}>
-                {STRING_SETS.map((set) => (
-                    <button
-                        key={set.id}
-                        onClick={() => setStringSet(set.id)}
-                        className={`${styles.filterBtn} ${stringSet === set.id ? styles.filterBtnActive : ''}`}
-                    >{set.label}</button>
-                ))}
+}) => {
+    const invDisabled = stringSet === 'all';
+
+    return (
+        <>
+            <div className={styles.panel}>
+                <span className={styles.panelLabel}>String Set</span>
+                <div className={styles.filterStack}>
+                    {STRING_SETS.map((set) => (
+                        <button
+                            key={set.id}
+                            onClick={() => setStringSet(set.id)}
+                            className={`${styles.filterBtn} ${stringSet === set.id ? styles.filterBtnActive : ''}`}
+                        >{set.label}</button>
+                    ))}
+                </div>
             </div>
-        </div>
-        <div className={styles.panel}>
-            <span className={styles.panelLabel}>Inversion</span>
-            <div className={styles.filterStack}>
-                {INVERSIONS.map((inv) => (
-                    <button
-                        key={inv.id}
-                        onClick={() => setInversion(inv.id)}
-                        className={`${styles.filterBtn} ${inversion === inv.id ? styles.filterBtnActive : ''}`}
-                    >{inv.label}</button>
-                ))}
+            <div className={styles.panel}>
+                <span className={styles.panelLabel}>Inversion</span>
+                {invDisabled && (
+                    <div className={styles.filterHelper}>Select a string set to filter inversions</div>
+                )}
+                <div className={styles.filterStack}>
+                    {INVERSIONS.map((inv) => (
+                        <button
+                            key={inv.id}
+                            onClick={() => !invDisabled && setInversion(inv.id)}
+                            disabled={invDisabled && inv.id !== 'all'}
+                            className={`${styles.filterBtn} ${inversion === inv.id ? styles.filterBtnActive : ''} ${invDisabled && inv.id !== 'all' ? styles.filterBtnDisabled : ''}`}
+                        >{inv.label}</button>
+                    ))}
+                </div>
             </div>
-        </div>
-    </>
-);
+        </>
+    );
+};
 
 // --- FRETBOARD RENDERER ---
 const FretboardView = ({
@@ -324,98 +404,146 @@ const FretboardView = ({
     showFullScale: boolean;
     labelType: 'intervals' | 'notes';
     notesList: string[];
-}) => (
-    <div className={styles.fretboardWrapper}>
-        <div className={styles.fretboard}>
-            <div className={styles.fretNut} />
-            {[...Array(15)].map((_, i) => (
-                <div key={i + 1} className={styles.fretColumn} style={{ left: `${4 + i * 6.4}%` }}>
-                    {INLAY_FRETS.includes(i + 1) && <div className={styles.inlayDot} />}
-                    {i + 1 === 12 && (
-                        <div className={styles.doubleInlay}>
-                            <div className={styles.inlayDot} />
-                            <div className={styles.inlayDot} />
-                        </div>
-                    )}
-                </div>
-            ))}
-            {[...Array(6)].map((_, i) => (
-                <div
-                    key={i}
-                    className={styles.string}
-                    style={{
-                        top: `${getRowCenter(i)}%`,
-                        height: `${1 + i * 0.5}px`,
-                        transform: 'translateY(-50%)',
-                        opacity: stringSet !== 'all' && !STRING_SETS.find((s) => s.id === stringSet)!.strings.includes(i) ? 0.2 : 1
-                    }}
-                />
-            ))}
-            <div className={styles.fretNumbers}>
-                <div className={styles.fretNumNut}>0</div>
+}) => {
+    const formula = FORMULAS[effectiveQuality];
+
+    return (
+        <div className={styles.fretboardWrapper}>
+            <div className={styles.fretboard}>
+                <div className={styles.fretNut} />
                 {[...Array(15)].map((_, i) => (
-                    <div key={i + 1} className={styles.fretNum}>{i + 1}</div>
+                    <div key={i + 1} className={styles.fretColumn} style={{ left: `${4 + i * 6.4}%` }}>
+                        {INLAY_FRETS.includes(i + 1) && <div className={styles.inlayDot} />}
+                        {i + 1 === 12 && (
+                            <div className={styles.doubleInlay}>
+                                <div className={styles.inlayDot} />
+                                <div className={styles.inlayDot} />
+                            </div>
+                        )}
+                    </div>
                 ))}
-            </div>
-            {scaleNodes.map((node) => {
-                const isActiveStringSet = stringSet === 'all' || STRING_SETS.find((s) => s.id === stringSet)!.strings.includes(node.string);
-                const isTriad = uniqueNodes.some((n) => n.string === node.string && n.fret === node.fret);
-                if (!showFullScale) {
+                {[...Array(6)].map((_, i) => (
+                    <div
+                        key={i}
+                        className={styles.string}
+                        style={{
+                            top: `${getRowCenter(i)}%`,
+                            height: `${1 + i * 0.5}px`,
+                            transform: 'translateY(-50%)',
+                            opacity: stringSet !== 'all' && !STRING_SETS.find((s) => s.id === stringSet)!.strings.includes(i) ? 0.2 : 1
+                        }}
+                    />
+                ))}
+                <div className={styles.fretNumbers}>
+                    <div className={styles.fretNumNut}>0</div>
+                    {[...Array(15)].map((_, i) => (
+                        <div key={i + 1} className={styles.fretNum}>{i + 1}</div>
+                    ))}
+                </div>
+                {scaleNodes.map((node) => {
+                    const isActiveStringSet = stringSet === 'all' || STRING_SETS.find((s) => s.id === stringSet)!.strings.includes(node.string);
+                    const isChordTone = uniqueNodes.some((n) => n.string === node.string && n.fret === node.fret);
+                    if (!showFullScale) {
+                        return (
+                            <div
+                                key={`scale-dot-${node.string}-${node.fret}`}
+                                className={`${styles.scaleDot} ${node.isKeyRoot ? styles.scaleDotRoot : styles.scaleDotNormal}`}
+                                style={{ left: `${getColCenter(node.fret)}%`, top: `${getRowCenter(node.string)}%`, opacity: isActiveStringSet ? 0.6 : 0.15 }}
+                            />
+                        );
+                    }
+                    if (isChordTone) return null;
                     return (
                         <div
-                            key={`scale-dot-${node.string}-${node.fret}`}
-                            className={`${styles.scaleDot} ${node.isKeyRoot ? styles.scaleDotRoot : styles.scaleDotNormal}`}
-                            style={{ left: `${getColCenter(node.fret)}%`, top: `${getRowCenter(node.string)}%`, opacity: isActiveStringSet ? 0.6 : 0.15 }}
-                        />
+                            key={`scale-full-${node.string}-${node.fret}`}
+                            className={`${styles.nodeBase} ${styles.nodeScale}`}
+                            style={{ left: `${getColCenter(node.fret)}%`, top: `${getRowCenter(node.string)}%`, opacity: isActiveStringSet ? 0.8 : 0.2 }}
+                        >
+                            {labelType === 'intervals' ? SCALES[keyType].scaleLabels[node.intervalIdx] : notesList[(rootNote + SCALES[keyType].intervals[node.intervalIdx]) % 12]}
+                        </div>
                     );
-                }
-                if (isTriad) return null;
-                return (
-                    <div
-                        key={`scale-full-${node.string}-${node.fret}`}
-                        className={`${styles.nodeBase} ${styles.nodeScale}`}
-                        style={{ left: `${getColCenter(node.fret)}%`, top: `${getRowCenter(node.string)}%`, opacity: isActiveStringSet ? 0.8 : 0.2 }}
-                    >
-                        {labelType === 'intervals' ? SCALES[keyType].scaleLabels[node.intervalIdx] : notesList[(rootNote + SCALES[keyType].intervals[node.intervalIdx]) % 12]}
+                })}
+                {uniqueNodes.map((node, idx) => {
+                    const scaleIntervalSemitones = formula.intervals[node.intervalIdx];
+                    const scaleIdx = (SCALES[keyType].intervals as readonly number[]).indexOf(
+                        (SCALES[keyType].intervals[activeDegree] + scaleIntervalSemitones) % 12
+                    );
+                    const scaleLabel = scaleIdx !== -1 ? SCALES[keyType].scaleLabels[scaleIdx] : formula.labels[node.intervalIdx];
+
+                    return (
+                        <div
+                            key={`node-${node.string}-${node.fret}-${idx}`}
+                            className={`${styles.nodeBase} ${styles.nodeTriad} ${getNodeColorClass(node.intervalIdx)}`}
+                            style={{ left: `${getColCenter(node.fret)}%`, top: `${getRowCenter(node.string)}%` }}
+                        >
+                            {labelType === 'intervals' ? scaleLabel : notesList[(effectiveRoot + formula.intervals[node.intervalIdx]) % 12]}
+                        </div>
+                    );
+                })}
+                {shapes.length === 0 && (
+                    <div className={styles.emptyState}>
+                        <span className={styles.emptyCard}>No playable closed triads found for these filters.</span>
                     </div>
-                );
-            })}
-            {uniqueNodes.map((node, idx) => {
-                const globalScaleIdx = (activeDegree + node.intervalIdx * 2) % 7;
-                return (
-                    <div
-                        key={`node-${node.string}-${node.fret}-${idx}`}
-                        className={`${styles.nodeBase} ${styles.nodeTriad} ${getNodeColorClass(node.intervalIdx)}`}
-                        style={{ left: `${getColCenter(node.fret)}%`, top: `${getRowCenter(node.string)}%` }}
-                    >
-                        {labelType === 'intervals' ? SCALES[keyType].scaleLabels[globalScaleIdx] : notesList[(effectiveRoot + FORMULAS[effectiveQuality].intervals[node.intervalIdx]) % 12]}
-                    </div>
-                );
-            })}
-            {shapes.length === 0 && (
-                <div className={styles.emptyState}>
-                    <span className={styles.emptyCard}>No playable closed triads found for these filters.</span>
-                </div>
-            )}
+                )}
+            </div>
         </div>
-    </div>
-);
+    );
+};
 
 // --- MAIN COMPONENT ---
 export const TriadExplorer = () => {
-    const [rootNote, setRootNote] = useState(0);
-    const [accidental, setAccidental] = useState<'sharp' | 'flat'>('sharp');
-    const [keyType, setKeyType] = useState<ScaleKey>('major');
-    const [activeDegree, setActiveDegree] = useState(0);
-    const [showFullScale, setShowFullScale] = useState(true);
-    const [stringSet, setStringSet] = useState('all');
-    const [inversion, setInversion] = useState('all');
-    const [labelType, setLabelType] = useState<'intervals' | 'notes'>('intervals');
+    const initialHash = parseHash();
+
+    const [rootNote, setRootNote] = useState(() => {
+        const v = parseInt(initialHash.root || '0', 10);
+        return v >= 0 && v < 12 ? v : 0;
+    });
+    const [accidental, setAccidental] = useState<'sharp' | 'flat'>(() =>
+        initialHash.acc === 'flat' ? 'flat' : 'sharp'
+    );
+    const [keyType, setKeyType] = useState<ScaleKey>(() =>
+        initialHash.key === 'minor' ? 'minor' : 'major'
+    );
+    const [activeDegree, setActiveDegree] = useState(() => {
+        const v = parseInt(initialHash.deg || '0', 10);
+        return v >= 0 && v < 7 ? v : 0;
+    });
+    const [showFullScale, setShowFullScale] = useState(() =>
+        initialHash.scale !== '0'
+    );
+    const [stringSet, setStringSet] = useState(() => initialHash.set || 'all');
+    const [inversion, setInversion] = useState(() => initialHash.inv || 'all');
+    const [labelType, setLabelType] = useState<'intervals' | 'notes'>(() =>
+        initialHash.label === 'notes' ? 'notes' : 'intervals'
+    );
     const [mobileControlsOpen, setMobileControlsOpen] = useState(false);
+    const [showShortcuts, setShowShortcuts] = useState(false);
+
+    // When string set is 'all', force inversion to 'all'
+    useEffect(() => {
+        if (stringSet === 'all' && inversion !== 'all') {
+            setInversion('all');
+        }
+    }, [stringSet, inversion]);
+
+    // URL hash sync
+    useEffect(() => {
+        updateHash({
+            root: String(rootNote),
+            key: keyType,
+            deg: String(activeDegree),
+            set: stringSet,
+            inv: inversion,
+            label: labelType,
+            acc: accidental,
+            scale: showFullScale ? '1' : '0'
+        });
+    }, [rootNote, keyType, activeDegree, stringSet, inversion, labelType, accidental, showFullScale]);
 
     const notesList = accidental === 'sharp' ? SHARPS : FLATS;
-    const effectiveRoot = (rootNote + SCALES[keyType].intervals[activeDegree]) % 12;
     const effectiveQuality = SCALES[keyType].chords[activeDegree].quality;
+    const effectiveRoot = (rootNote + SCALES[keyType].intervals[activeDegree]) % 12;
+    const formula = FORMULAS[effectiveQuality];
 
     const scaleNodes = useMemo(() => computeScaleNodes(keyType, rootNote), [keyType, rootNote]);
     const shapes = useMemo(
@@ -423,6 +551,41 @@ export const TriadExplorer = () => {
         [effectiveRoot, effectiveQuality, stringSet, inversion]
     );
     const uniqueNodes = useMemo(() => deduplicateNodes(shapes), [shapes]);
+
+    // Keyboard shortcuts
+    const handleKeyDown = useCallback((e: KeyboardEvent) => {
+        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+        const key = e.key;
+        if (key >= '1' && key <= '7') {
+            e.preventDefault();
+            setActiveDegree(parseInt(key, 10) - 1);
+        } else if (key === '8') {
+            e.preventDefault();
+            setShowFullScale((v) => !v);
+        } else if (key === 'ArrowLeft') {
+            e.preventDefault();
+            setRootNote((v) => (v - 1 + 12) % 12);
+        } else if (key === 'ArrowRight') {
+            e.preventDefault();
+            setRootNote((v) => (v + 1) % 12);
+        } else if (key === 'ArrowUp' || key === 'ArrowDown') {
+            e.preventDefault();
+            setKeyType((k) => (k === 'major' ? 'minor' : 'major'));
+            setActiveDegree(0);
+        } else if (key === 'n' || key === 'N') {
+            e.preventDefault();
+            setLabelType((v) => (v === 'intervals' ? 'notes' : 'intervals'));
+        } else if (key === '?') {
+            e.preventDefault();
+            setShowShortcuts((v) => !v);
+        }
+    }, []);
+
+    useEffect(() => {
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [handleKeyDown]);
 
     const fretboardProps = {
         scaleNodes, uniqueNodes, shapes, keyType, rootNote, activeDegree,
@@ -439,36 +602,40 @@ export const TriadExplorer = () => {
                         Triad Explorer
                     </div>
                 </div>
+                <button
+                    className={styles.helpBtn}
+                    onClick={() => setShowShortcuts((v) => !v)}
+                    aria-label="Keyboard shortcuts"
+                >
+                    <HelpCircle size={18} />
+                </button>
             </header>
 
-            {/* Chord info bar — with Display toggle on the right */}
+            {/* Chord info bar */}
             <div className={styles.chordInfoBar}>
                 <div className={styles.chordInfoName}>
                     <span className={styles.chordInfoDegree}>{SCALES[keyType].chords[activeDegree].degree}</span>
                     <span>
                         {notesList[effectiveRoot]}
-                        <span className={styles.chordInfoQuality}>{FORMULAS[effectiveQuality].name.substring(0, 3)}</span>
+                        <span className={styles.chordInfoQuality}>{formula.abbr}</span>
                     </span>
                 </div>
                 <div className={styles.chordInfoDivider} />
                 <div className={styles.chordInfoSpelling}>
-                    {FORMULAS[effectiveQuality].intervals.map((int, i) => (
+                    {formula.intervals.map((int, i) => (
                         <span key={i} className={styles.spellingChip}>{notesList[(effectiveRoot + int) % 12]}</span>
                     ))}
                 </div>
                 <div className={styles.chordInfoDivider} />
                 <div className={styles.chordInfoIntervals}>
-                    {[0, 1, 2].map((intervalIdx) => {
-                        const globalScaleIdx = (activeDegree + intervalIdx * 2) % 7;
-                        return <span key={intervalIdx} className={styles.intervalChip}>{SCALES[keyType].scaleLabels[globalScaleIdx]}</span>;
-                    })}
+                    {formula.labels.map((label, i) => (
+                        <span key={i} className={styles.intervalChip}>{label}</span>
+                    ))}
                 </div>
                 <div className={styles.chordInfoDivider} />
                 <span style={{ fontSize: '0.7rem', color: '#737373', whiteSpace: 'nowrap' }}>
                     {notesList[rootNote]} {SCALES[keyType].name}
                 </span>
-
-                {/* Display toggle — prominent position, pushed right */}
                 <div className={styles.infoBarDisplayToggle}>
                     <div className={styles.toggleBar}>
                         <button
@@ -486,7 +653,10 @@ export const TriadExplorer = () => {
             {/* Fretboard */}
             <FretboardView {...fretboardProps} />
 
-            {/* Mobile inline controls: Key + Chords (always visible on mobile) */}
+            {/* Color Legend */}
+            <ColorLegend />
+
+            {/* Mobile inline controls */}
             <div className={styles.mobileInlineControls}>
                 <KeyCenterPanel notesList={notesList} rootNote={rootNote} setRootNote={setRootNote} accidental={accidental} setAccidental={setAccidental} />
                 <ChordsPanel
@@ -497,7 +667,7 @@ export const TriadExplorer = () => {
                 />
             </div>
 
-            {/* Desktop: all 4 control panels */}
+            {/* Desktop controls */}
             <div className={styles.controlsSection}>
                 <div className={styles.controlsGrid}>
                     <KeyCenterPanel notesList={notesList} rootNote={rootNote} setRootNote={setRootNote} accidental={accidental} setAccidental={setAccidental} />
@@ -514,7 +684,7 @@ export const TriadExplorer = () => {
                 </div>
             </div>
 
-            {/* Mobile bottom sheet: filters only */}
+            {/* Mobile bottom sheet */}
             {mobileControlsOpen && (
                 <>
                     <div className={styles.mobileOverlay} onClick={() => setMobileControlsOpen(false)} />
@@ -539,6 +709,9 @@ export const TriadExplorer = () => {
             >
                 {mobileControlsOpen ? <X size={22} /> : <SlidersHorizontal size={22} />}
             </button>
+
+            {/* Shortcuts overlay */}
+            {showShortcuts && <ShortcutHelp onClose={() => setShowShortcuts(false)} />}
         </div>
     );
 };

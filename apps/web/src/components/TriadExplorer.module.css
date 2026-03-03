@@ -31,6 +31,26 @@
   letter-spacing: -0.02em;
 }
 
+.helpBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1px solid #3f3f46;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  color: #737373;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.helpBtn:hover {
+  color: #e5e5e5;
+  border-color: #737373;
+}
+
 /* ——— Chord Info Bar ——— */
 .chordInfoBar {
   display: flex;
@@ -505,6 +525,114 @@
 .filterBtnActive {
   background: #4f46e5;
   color: #fff;
+}
+
+.filterBtnDisabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.filterBtnDisabled:hover {
+  background: #262626;
+}
+
+.filterHelper {
+  font-size: 0.65rem;
+  color: #525252;
+  margin-bottom: 0.35rem;
+  font-style: italic;
+}
+
+/* ——— Color Legend ——— */
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.35rem 1.25rem;
+  border-bottom: 1px solid #1a1a1a;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.65rem;
+  color: #737373;
+}
+
+.legendDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ——— Shortcut Overlay ——— */
+.shortcutOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.15s ease;
+}
+
+.shortcutCard {
+  background: #171717;
+  border: 1px solid #333;
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  width: min(340px, 90vw);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+}
+
+.shortcutHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #fff;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #333;
+}
+
+.shortcutClose {
+  background: none;
+  border: none;
+  color: #737373;
+  cursor: pointer;
+  padding: 0.2rem;
+}
+
+.shortcutClose:hover {
+  color: #fff;
+}
+
+.shortcutRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.3rem 0;
+  font-size: 0.78rem;
+  color: #a3a3a3;
+}
+
+.kbd {
+  display: inline-block;
+  background: #262626;
+  border: 1px solid #3f3f46;
+  border-radius: 0.25rem;
+  padding: 0.15rem 0.45rem;
+  font-size: 0.7rem;
+  font-family: inherit;
+  color: #e5e5e5;
+  min-width: 3rem;
+  text-align: center;
 }
 
 /* ——— Mobile inline controls ——— */

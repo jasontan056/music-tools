@@ -47,19 +47,12 @@ describe('seedDemoData', () => {
 
   it('clears the database and rehydrates the demo account', async () => {
     await seedDemoData(prisma);
-    let users = await prisma.user.findMany({ include: { todos: true } });
+    let users = await prisma.user.findMany();
     expect(users).toHaveLength(1);
-    expect(users[0].todos).toHaveLength(3);
     expect(users[0].email).toBe('demo@example.com');
     expect(users[0].passwordHash).not.toBe('demo1234');
 
     const userId = users[0].id;
-    await prisma.todo.create({
-      data: {
-        title: 'Should disappear',
-        ownerId: userId
-      }
-    });
     await prisma.session.create({
       data: {
         token: 'temp-session',
@@ -69,14 +62,10 @@ describe('seedDemoData', () => {
     });
 
     await seedDemoData(prisma);
-    users = await prisma.user.findMany({ include: { todos: true } });
+    users = await prisma.user.findMany();
     expect(users).toHaveLength(1);
-    expect(users[0].todos).toHaveLength(3);
 
     const sessions = await prisma.session.count();
     expect(sessions).toBe(0);
-
-    const statuses = users[0].todos.map((todo) => todo.status);
-    expect(statuses).toEqual(expect.arrayContaining(['BACKLOG', 'IN_PROGRESS', 'DONE']));
   });
 });

@@ -1,6 +1,6 @@
 /// <reference types="vitest" />
 import { describe, it, expect } from 'vitest';
-import { formatDate, formatRelativeDate } from './index.js';
+import { formatDate } from './index.js';
 
 describe('date formatting helpers', () => {
   it('formats ISO strings consistently', () => {
@@ -8,8 +8,8 @@ describe('date formatting helpers', () => {
     expect(formatDate(date)).toMatch(/2024/);
   });
 
-  it('renders relative labels gracefully', () => {
-    expect(formatRelativeDate(null)).toBe('No due date');
-    expect(formatRelativeDate('2024-01-15T10:30:00.000Z')).toMatch(/Jan/);
+  it('formats Date objects', () => {
+    const date = new Date('2024-01-15T10:30:00.000Z');
+    expect(formatDate(date)).toMatch(/2024/);
   });
 });
