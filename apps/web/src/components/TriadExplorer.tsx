@@ -175,6 +175,22 @@ export const deduplicateNodes = (shapes: Shape[]): ShapeNode[] => {
     return list;
 };
 
+export const computeChordTones = (effectiveRoot: number, effectiveQuality: FormulaKey): ShapeNode[] => {
+    const formula = FORMULAS[effectiveQuality];
+    const targetNotes = formula.intervals.map((int) => (effectiveRoot + int) % 12);
+    const list: ShapeNode[] = [];
+    for (let s = 0; s < 6; s++) {
+        for (let f = 0; f <= 15; f++) {
+            const note = (TUNING[s] + f) % 12;
+            const intervalIdx = targetNotes.indexOf(note);
+            if (intervalIdx !== -1) {
+                list.push({ string: s, fret: f, intervalIdx });
+            }
+        }
+    }
+    return list;
+};
+
 // --- URL HASH STATE ---
 const parseHash = (): Record<string, string> => {
     const hash = window.location.hash.slice(1);
@@ -199,6 +215,13 @@ const getNodeColorClass = (intervalIdx: number) => {
     if (intervalIdx === 0) return styles.nodeRoot;
     if (intervalIdx === 1) return styles.nodeThird;
     if (intervalIdx === 2) return styles.nodeFifth;
+    return '';
+};
+
+const getGhostColorClass = (intervalIdx: number) => {
+    if (intervalIdx === 0) return styles.ghostRoot;
+    if (intervalIdx === 1) return styles.ghostThird;
+    if (intervalIdx === 2) return styles.ghostFifth;
     return '';
 };
 
@@ -389,11 +412,12 @@ const FiltersPanel = ({
 
 // --- FRETBOARD RENDERER ---
 const FretboardView = ({
-    scaleNodes, uniqueNodes, shapes, keyType, rootNote, activeDegree,
+    scaleNodes, uniqueNodes, ghostNodes, shapes, keyType, rootNote, activeDegree,
     effectiveRoot, effectiveQuality, stringSet, showFullScale, labelType, notesList
 }: {
     scaleNodes: ScaleNode[];
     uniqueNodes: ShapeNode[];
+    ghostNodes: ShapeNode[];
     shapes: Shape[];
     keyType: ScaleKey;
     rootNote: number;
@@ -442,7 +466,12 @@ const FretboardView = ({
                 </div>
                 {scaleNodes.map((node) => {
                     const isActiveStringSet = stringSet === 'all' || STRING_SETS.find((s) => s.id === stringSet)!.strings.includes(node.string);
-                    const isChordTone = uniqueNodes.some((n) => n.string === node.string && n.fret === node.fret);
+                    const isChordTone =
+                        uniqueNodes.some((n) => n.string === node.string && n.fret === node.fret) ||
+                        ghostNodes.some((n) => n.string === node.string && n.fret === node.fret);
+
+                    if (isChordTone) return null;
+
                     if (!showFullScale) {
                         return (
                             <div
@@ -452,7 +481,6 @@ const FretboardView = ({
                             />
                         );
                     }
-                    if (isChordTone) return null;
                     return (
                         <div
                             key={`scale-full-${node.string}-${node.fret}`}
@@ -460,6 +488,18 @@ const FretboardView = ({
                             style={{ left: `${getColCenter(node.fret)}%`, top: `${getRowCenter(node.string)}%`, opacity: isActiveStringSet ? 0.8 : 0.2 }}
                         >
                             {labelType === 'intervals' ? SCALES[keyType].scaleLabels[node.intervalIdx] : notesList[(rootNote + SCALES[keyType].intervals[node.intervalIdx]) % 12]}
+                        </div>
+                    );
+                })}
+                {ghostNodes.map((node, idx) => {
+                    const isActiveStringSet = stringSet === 'all' || STRING_SETS.find((s) => s.id === stringSet)!.strings.includes(node.string);
+                    return (
+                        <div
+                            key={`ghost-${node.string}-${node.fret}-${idx}`}
+                            className={`${styles.nodeBase} ${styles.nodeGhost} ${getGhostColorClass(node.intervalIdx)}`}
+                            style={{ left: `${getColCenter(node.fret)}%`, top: `${getRowCenter(node.string)}%`, opacity: isActiveStringSet ? 1 : 0.4 }}
+                        >
+                            {labelType === 'intervals' ? formula.labels[node.intervalIdx] : notesList[(effectiveRoot + formula.intervals[node.intervalIdx]) % 12]}
                         </div>
                     );
                 })}
@@ -552,6 +592,13 @@ export const TriadExplorer = () => {
     );
     const uniqueNodes = useMemo(() => deduplicateNodes(shapes), [shapes]);
 
+    // Ghost chord tones: all R/3/5 positions NOT already in a voicing shape
+    const ghostNodes = useMemo(() => {
+        const allChordTones = computeChordTones(effectiveRoot, effectiveQuality);
+        const voicingSet = new Set(uniqueNodes.map((n) => `${n.string}-${n.fret}`));
+        return allChordTones.filter((n) => !voicingSet.has(`${n.string}-${n.fret}`));
+    }, [effectiveRoot, effectiveQuality, uniqueNodes]);
+
     // Keyboard shortcuts
     const handleKeyDown = useCallback((e: KeyboardEvent) => {
         if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
@@ -588,7 +635,7 @@ export const TriadExplorer = () => {
     }, [handleKeyDown]);
 
     const fretboardProps = {
-        scaleNodes, uniqueNodes, shapes, keyType, rootNote, activeDegree,
+        scaleNodes, uniqueNodes, ghostNodes, shapes, keyType, rootNote, activeDegree,
         effectiveRoot, effectiveQuality, stringSet, showFullScale, labelType, notesList
     };
 

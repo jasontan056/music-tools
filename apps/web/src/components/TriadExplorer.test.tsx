@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
     computeScaleNodes,
     computeShapes,
+    computeChordTones,
     deduplicateNodes,
     FORMULAS,
     SCALES,
@@ -164,6 +165,40 @@ describe('TriadExplorer Logic', () => {
             expect(unique[0]).toEqual({ string: 5, fret: 3, intervalIdx: 0 });
             expect(unique[1]).toEqual({ string: 4, fret: 2, intervalIdx: 1 });
             expect(unique[2]).toEqual({ string: 3, fret: 0, intervalIdx: 2 });
+        });
+    });
+
+    describe('computeChordTones', () => {
+        it('returns all C Major chord tones across the fretboard', () => {
+            const tones = computeChordTones(0, 'major');
+            expect(tones.length).toBeGreaterThan(0);
+            tones.forEach((t) => {
+                const note = (TUNING[t.string] + t.fret) % 12;
+                expect([0, 4, 7]).toContain(note);
+            });
+        });
+
+        it('assigns correct intervalIdx values', () => {
+            const tones = computeChordTones(0, 'major');
+            tones.forEach((t) => {
+                const note = (TUNING[t.string] + t.fret) % 12;
+                if (note === 0) expect(t.intervalIdx).toBe(0);
+                if (note === 4) expect(t.intervalIdx).toBe(1);
+                if (note === 7) expect(t.intervalIdx).toBe(2);
+            });
+        });
+
+        it('includes the open low E string for C Major (E = 3rd)', () => {
+            const tones = computeChordTones(0, 'major');
+            const openLowE = tones.find((t) => t.string === 0 && t.fret === 0);
+            expect(openLowE).toBeDefined();
+            expect(openLowE!.intervalIdx).toBe(1);
+        });
+
+        it('covers all 6 strings', () => {
+            const tones = computeChordTones(0, 'major');
+            const strings = new Set(tones.map((t) => t.string));
+            expect(strings.size).toBe(6);
         });
     });
 
